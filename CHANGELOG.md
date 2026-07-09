@@ -1,0 +1,34 @@
+# Changelog
+
+All notable changes to LifePilot are documented in this file.
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versioning follows [Semantic Versioning](https://semver.org/) as described in [Release Strategy](docs/ENGINEERING_GUIDE.md#release-strategy).
+
+## [Unreleased]
+
+### Added
+
+- Full repository engineering foundation: issue templates, PR template, CI/CD workflows, branch protection documentation.
+- Core documentation set: `ARCHITECTURE.md`, `ROADMAP.md`, `docs/PRODUCT_VISION.md`, `docs/DESIGN_SYSTEM.md`, `docs/ENGINEERING_GUIDE.md`, `docs/API_GUIDELINES.md`, `docs/STYLE_GUIDE.md`, `docs/DECISIONS.md`.
+- `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`.
+- Brand identity: LifePilot logo and mark under `Assets/brand/`.
+- Enterprise-grade `README.md` landing page.
+
+---
+
+## Release History
+
+_No versions have been tagged yet. Entries will be added here as releases ship, following the version-to-milestone mapping in [ROADMAP.md](ROADMAP.md)._
+
+<!--
+## [0.1.0] - YYYY-MM-DD
+
+### Added
+- ...
+
+### Changed
+- ...
+
+### Fixed
+- ...
+-->
