@@ -2,8 +2,11 @@ included:
   - Core
   - Agents
   - DesignSystem
+  - GhostBrain
+  - Mocks
   - Features
   - Services
+  - AppShell
   - App
   - Tests
 
