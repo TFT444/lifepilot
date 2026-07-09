@@ -16,11 +16,24 @@ Your calendar, inbox, weather, travel, and priorities — understood, predicted,
 [![Stars](https://img.shields.io/github/stars/TFT444/LifePilot?style=flat-square&color=1a1a2e)](../../stargazers)
 [![Contributors](https://img.shields.io/github/contributors/TFT444/LifePilot?style=flat-square&color=1a1a2e)](#contributing)
 
-[Introduction](#introduction) · [Architecture](#architecture-overview) · [Roadmap](#roadmap) · [Contributing](#contributing)
+[Introduction](#introduction) · [Architecture](#architecture-overview) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Live Demo](#live-demo)
 
 </div>
 
 <br />
+
+---
+
+## Live Demo
+
+Try the interactive LifePilot product demo in your browser (mock data, no backend):
+
+| Link | Notes |
+|---|---|
+| [lifepilot.vercel.app](https://lifepilot.vercel.app) | Production (Vercel) — redeploys from `main` |
+| [tft444.github.io/lifepilot](https://tft444.github.io/lifepilot/) | GitHub Pages — enable once in **Settings → Pages → GitHub Actions** |
+
+If GitHub Pages shows 404, open **Settings → Pages** and set the source to **GitHub Actions** (one-time repo setting).
 
 ---
 
