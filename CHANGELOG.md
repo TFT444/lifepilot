@@ -13,6 +13,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`.
 - Brand identity: LifePilot logo and mark under `Assets/brand/`.
 - Enterprise-grade `README.md` landing page.
+- First buildable target: `Package.swift` defining the `LifePilotCore` library (`Core/`) and its test target (`Tests/Core/`), unblocking CI's Build, Unit Tests, and SwiftLint checks.
+- `.swiftlint.yml` and `.swiftformat` configuration, tuned to `docs/STYLE_GUIDE.md`.
 
 ---
 

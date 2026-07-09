@@ -66,6 +66,8 @@ lifepilot/
 
 Each first-class module (`Core`, `Agents`, `DesignSystem`, `Features`, `Services`) is expected to be internally organized by feature, not by file type — e.g. `Agents/CalendarAgent/CalendarAgent.swift`, `Agents/CalendarAgent/CalendarSignal.swift`, `Agents/CalendarAgent/Tests/`, rather than a flat `Models/`, `Views/`, `Controllers/` split at the top level.
 
+The root `Package.swift` currently builds `Core` as the `LifePilotCore` library target — the first buildable unit, giving CI a real target ahead of the full iOS app (tracked in [#4](https://github.com/TFT444/LifePilot/issues/4)). `packages/` remains reserved for domain logic *extracted* from `Core` once it outgrows a single target, per [ADR-005](DECISIONS.md#adr-005-protocol-first-module-boundaries) — the two are not redundant, just different stages of the same growth path.
+
 ## Layered Architecture
 
 LifePilot follows a strict layering model. Each layer may depend only on the layers below it.
