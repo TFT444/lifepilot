@@ -1,27 +1,48 @@
 import LifePilotCore
 import LifePilotGhostBrain
 import LifePilotMocks
+import LifePilotServices
 
-/// The composition root: wires concrete implementations to the protocols
-/// `Features` depend on, per docs/ENGINEERING_GUIDE.md's Dependency
-/// Injection standard: "A lightweight composition root in App/ wires
-/// concrete implementations to their protocols at app launch."
-///
-/// In this phase, `ghostBrain` is always `MockRecommendationProvider` —
-/// swapping in the real `GhostBrainService` (docs/MASTER_ROADMAP.md Phase
-/// 5) is a one-line change here, with no change required in `Features`.
+/// Composition root: wires Core protocols to concrete services and mocks.
+/// Features never import Services or Mocks directly.
 public struct AppDependencies: Sendable {
     public let ghostBrain: GhostBrainServing
     public let timelineProvider: TimelineProviding
+    public let taskStore: any TaskStore
+    public let eventStore: any EventStore
+    public let preferenceStore: any PreferenceStore
+    public let planningEngine: any PlanningEngine
 
     public init(
-        ghostBrain: GhostBrainServing = MockRecommendationProvider(),
-        timelineProvider: TimelineProviding = MockTimelineProvider()
+        ghostBrain: GhostBrainServing,
+        timelineProvider: TimelineProviding,
+        taskStore: any TaskStore,
+        eventStore: any EventStore,
+        preferenceStore: any PreferenceStore,
+        planningEngine: any PlanningEngine = DeterministicPlanningEngine()
     ) {
         self.ghostBrain = ghostBrain
         self.timelineProvider = timelineProvider
+        self.taskStore = taskStore
+        self.eventStore = eventStore
+        self.preferenceStore = preferenceStore
+        self.planningEngine = planningEngine
     }
 
-    /// The default, production-shaped set of dependencies for this phase.
-    public static let live = AppDependencies()
+    /// Offline-capable default for the daily-life MVP: seeded in-memory stores
+    /// plus deterministic mock briefing content.
+    public static var live: AppDependencies {
+        let tasks = MockTasks.items()
+        let events = MockCalendar.events()
+        let taskStore = InMemoryTaskStore(seed: tasks)
+        let eventStore = InMemoryEventStore(seed: events)
+        return AppDependencies(
+            ghostBrain: MockRecommendationProvider(),
+            timelineProvider: StoreBackedTimelineProvider(taskStore: taskStore, eventStore: eventStore),
+            taskStore: taskStore,
+            eventStore: eventStore,
+            preferenceStore: InMemoryPreferenceStore(),
+            planningEngine: DeterministicPlanningEngine()
+        )
+    }
 }

@@ -432,7 +432,7 @@
       { id: 'r3', icon: '👥', title: 'Team meeting in 2 hours', why: 'Prep notes from last sync are ready to review.', badge: 'med',
         detail: { meta: [['📋','3 open action items from last meeting'], ['⏱️','Starts 09:00, 30 min']],
           benefits: ['Walk in prepared', 'No forgotten follow-ups'] }, approved: false },
-      { id: 'r4', icon: '💳', title: 'Adobe renews today', why: '$52.99 charge expected — flagged for your review.', badge: 'high',
+      { id: 'r4', icon: '✅', title: 'Board deck due today', why: 'High-priority task still open with limited afternoon focus time.', badge: 'high',
         detail: { meta: [['💳','$52.99 renewal expected today'], ['📊','3rd price increase this year']],
           benefits: ['No surprise charge', 'Chance to cancel first'] }, approved: false },
     ],
@@ -468,7 +468,7 @@
       travel: { big: 'Leave in 15 min', small: 'Heavy traffic today' },
       email: { big: '2 Important', small: 'Requires your reply' },
       meeting: { big: 'Meeting in 2h', small: '10:00 – 11:00 AM' },
-      finance: { big: 'Adobe renews', small: '£52.99 · Annual Plan' },
+      tasks: { big: '3 Due', small: '1 high priority' },
       tasks: { big: `${5} tasks`, small: 'See all tasks' },
     },
   };
@@ -476,7 +476,7 @@
   const STATUS_MESSAGES = [
     'Checking traffic...', 'Checking calendar...', 'Weather updated', 'Email analysed',
     'Travel recalculated', 'Meeting confirmed', 'Everything looks good', 'New recommendation found',
-    'Schedule optimised', 'Health summary updated', 'Scanning inbox...', 'Syncing timeline...',
+    'Schedule optimised', 'Briefing refreshed', 'Scanning inbox...', 'Syncing timeline...',
   ];
 
   const CTA_LABELS = ['Review Recommendations', 'Travel Updated', 'Weather Alert', 'Meeting Changed', '1 New Insight', 'Everything Looks Good'];
@@ -485,14 +485,14 @@
     { icon: '🧠', title: 'Ghost Brain', body: 'Traffic increased.', rec: 'Leave now.', action: 'r1' },
     { icon: '📅', title: 'Ghost Brain', body: 'Meeting moved.', rec: 'Leave 10 minutes later.', action: null },
     { icon: '🌧️', title: 'Ghost Brain', body: 'Rain arriving sooner.', rec: 'Bring an umbrella.', action: 'r2' },
-    { icon: '✉️', title: 'Ghost Brain', body: 'You received an important email.', rec: 'Reply before 11 AM.', action: null },
-    { icon: '💳', title: 'Ghost Brain', body: 'Adobe payment due tomorrow.', rec: 'Review your subscription.', action: 'r4' },
+    { icon: '📅', title: 'Ghost Brain', body: 'Pickup overlaps your 2 PM sync.', rec: 'Reschedule or shorten the meeting.', action: 'r3' },
+    { icon: '✅', title: 'Ghost Brain', body: 'Board deck is due this afternoon.', rec: 'Block 45 minutes of focus time.', action: 'r2' },
     { icon: '✅', title: 'Ghost Brain', body: 'Task list updated.', rec: 'One task completed automatically.', action: null },
   ];
 
   const ACTIVITY_MESSAGES = [
     'Traffic checked', 'Calendar synced', 'Weather updated', 'Timeline optimised', 'Everything normal',
-    'Inbox scanned', 'Route recalculated', 'Meeting notes prepped', 'Finance checked', 'Health summary refreshed',
+    'Inbox scanned', 'Route recalculated', 'Meeting notes prepped', 'Conflicts checked', 'Schedule refreshed',
   ];
 
   /* ============ ICONS ============ */
@@ -610,10 +610,10 @@
           <div class="big">${state.liveTiles.meeting.big}</div>
           <div class="small">${state.liveTiles.meeting.small}</div>
         </div>
-        <div class="stat-tile" id="tile-finance" onclick="openSheet('r4')">
+        <div class="stat-tile" id="tile-tasks" onclick="goTab('home')">
           <div class="top-row"><div class="icon-badge" style="background:rgba(242,85,122,0.14)">💳</div><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
-          <div class="big">${state.liveTiles.finance.big}</div>
-          <div class="small">${state.liveTiles.finance.small}</div>
+          <div class="big">${state.liveTiles.tasks.big}</div>
+          <div class="small">${state.liveTiles.tasks.small}</div>
         </div>
         <div class="stat-tile" id="tile-tasks" onclick="goTab('timeline')">
           <div class="top-row"><div class="icon-badge" style="background:rgba(168,85,247,0.14)">✅</div><div class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>
@@ -649,8 +649,8 @@
       <div class="quick-actions-row fade-item in">
         <div class="qa-tile" onclick="openQuickAction('calendar')"><div class="circle" style="color:var(--violet)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div><span class="lbl">Calendar</span></div>
         <div class="qa-tile" onclick="openQuickAction('travel')"><div class="circle" style="color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></div><span class="lbl">Travel</span></div>
-        <div class="qa-tile" onclick="openQuickAction('finance')"><div class="circle" style="color:var(--risk)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><span class="lbl">Finance</span></div>
-        <div class="qa-tile" onclick="openQuickAction('health')"><div class="circle" style="color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg></div><span class="lbl">Health</span></div>
+        <div class="qa-tile" onclick="openQuickAction('tasks')"><div class="circle" style="color:var(--risk)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><span class="lbl">Tasks</span></div>
+        <div class="qa-tile" onclick="openQuickAction('focus')"><div class="circle" style="color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div><span class="lbl">Focus</span></div>
         <div class="qa-tile" onclick="openQuickAction('memory')"><div class="circle" style="color:var(--violet)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 2-2 3-2 5H10c0-2-2-3-2-5a4 4 0 014-4zM10 17h4M9 21h6"/></svg></div><span class="lbl">Memory</span></div>
         <div class="qa-tile" onclick="showToast('⋯ More options')"><div class="circle" style="color:var(--ink-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></div><span class="lbl">More</span></div>
       </div>
@@ -766,10 +766,10 @@
     travel: { badge: 'high', badgeLabel: 'Current Route', title: 'Current Route',
       meta: [['🚦','Traffic 34% heavier than normal'], ['📍','Home → Office, 22 min']],
       rows: ['Fastest route: via A40', 'Alternate: via Ring Road (+6 min)', 'Rain begins 08:40 — leave early'] },
-    finance: { badge: 'high', badgeLabel: 'Subscriptions', title: 'Subscriptions',
-      meta: [['💳','£52.99 Adobe renewal today'], ['📊','4 active subscriptions']],
-      rows: ['Adobe Creative Cloud — £52.99/mo', 'Spotify — £11.99/mo', 'iCloud+ — £2.99/mo'] },
-    health: { badge: 'med', badgeLabel: "Today's Activity", title: "Today's Activity",
+    tasks: { badge: 'high', badgeLabel: 'Today', title: 'Today’s Tasks',
+      meta: [['✅','3 open tasks today'], ['⏱️','45m focus available']],
+      rows: ['Send board deck — due 4 PM', 'Confirm pickup plan', 'Prep Design Review notes'] },
+    focus: { badge: 'med', badgeLabel: 'Focus', title: 'Focus Windows',
       meta: [['❤️','Resting heart rate 62 bpm'], ['🏃','4,120 steps so far today']],
       rows: ['Gym — Upper Body, 18:00', 'Sleep last night: 7h 12m', 'Hydration: 3 of 8 glasses'] },
     memory: { badge: 'med', badgeLabel: 'Recent Notes', title: 'Recent Notes',
@@ -975,7 +975,7 @@
     travel: [{ big: 'Leave in 15 min', small: 'Heavy traffic today' }, { big: 'Leave in 18 min', small: 'Traffic increased' }, { big: 'Leave now', small: 'Route recalculated' }],
     email: [{ big: '2 Important', small: 'Requires your reply' }, { big: '3 Important', small: 'One requires reply' }, { big: '3 Important', small: 'Reply before 11 AM' }],
     meeting: [{ big: 'Meeting in 2h', small: '10:00 – 11:00 AM' }, { big: 'Starts in 1h 52m', small: '10:00 – 11:00 AM' }, { big: 'Meeting confirmed', small: 'Room 4B · 10:00 AM' }],
-    finance: [{ big: 'Adobe renews', small: '£52.99 · Annual Plan' }, { big: 'Payment due tomorrow', small: 'Adobe · £52.99' }],
+    tasks: [{ big: '3 Due', small: '1 high priority' }, { big: '2 Due', small: 'Deck due soon' }],
     tasks: [{ big: `${state.timeline.length} tasks`, small: 'See all tasks' }, { big: `${Math.max(state.timeline.length - 1, 1)} tasks`, small: 'One completed' }],
   };
 

@@ -47,6 +47,11 @@ let package = Package(
             dependencies: ["LifePilotCore"],
             path: "Services"
         ),
+        .testTarget(
+            name: "LifePilotServicesTests",
+            dependencies: ["LifePilotServices", "LifePilotCore"],
+            path: "Tests/Services"
+        ),
 
         // MARK: - Mocks (test/preview support)
 
@@ -98,13 +103,14 @@ let package = Package(
                 "LifePilotGhostBrain",
                 "LifePilotDesignSystem",
                 "LifePilotFeatures",
+                "LifePilotServices",
                 "LifePilotMocks",
             ],
             path: "AppShell"
         ),
         .testTarget(
             name: "LifePilotAppShellTests",
-            dependencies: ["LifePilotAppShell"],
+            dependencies: ["LifePilotAppShell", "LifePilotCore", "LifePilotServices"],
             path: "Tests/AppShell"
         ),
     ]

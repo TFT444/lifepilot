@@ -1,12 +1,8 @@
 import Foundation
 import LifePilotCore
 
-/// A `GhostBrainServing` implementation backed entirely by mock data. This
-/// is what the App composition root wires in during Phase 3 — see
-/// docs/MASTER_ROADMAP.md's Phase 4 risk mitigation: "screens are built
-/// against the Prediction/Recommendation types... even while populated by
-/// stub data," so Features never needs to change when GhostBrainService
-/// replaces this in Phase 5.
+/// Deterministic sample briefing content for previews and offline demos.
+/// No finance, shopping, or health signals.
 public struct MockRecommendationProvider: GhostBrainServing {
     private let clock: @Sendable () -> Date
 
@@ -48,16 +44,16 @@ public struct MockRecommendationProvider: GhostBrainServing {
                 createdAt: now
             ),
             RecommendationModel(
-                title: "Reply to Priya about the Q3 roadmap",
-                reasoning: "This email has been waiting three days and mentions a deadline of this Friday.",
-                sourceAgent: .email,
+                title: "Block 45 minutes for the board deck",
+                reasoning: "High-priority task is due this afternoon and you still have an open focus window after lunch.",
+                sourceAgent: .task,
                 riskLevel: .low,
                 urgency: .normal,
                 createdAt: now
             ),
             RecommendationModel(
                 title: "Reschedule your 2:00 PM — it conflicts with pickup",
-                reasoning: "Your calendar shows a 2:00 PM sync overlapping with the recurring 'School Pickup' block.",
+                reasoning: "Your calendar shows a 2:00 PM sync overlapping with the recurring School Pickup block.",
                 sourceAgent: .calendar,
                 riskLevel: .medium,
                 urgency: .high,
@@ -74,20 +70,28 @@ public struct MockRecommendationProvider: GhostBrainServing {
                 location: "Studio — Room 2B",
                 startDate: calendar.date(bySettingHour: 10, minute: 0, second: 0, of: now) ?? now,
                 endDate: calendar.date(bySettingHour: 10, minute: 45, second: 0, of: now) ?? now,
-                attendeeCount: 5
+                attendeeCount: 5,
+                context: .work,
+                eventKind: .meeting
             ),
             CalendarEvent(
                 title: "1:1 with Priya",
                 location: nil,
                 startDate: calendar.date(bySettingHour: 13, minute: 30, second: 0, of: now) ?? now,
                 endDate: calendar.date(bySettingHour: 14, minute: 0, second: 0, of: now) ?? now,
-                attendeeCount: 2
+                attendeeCount: 2,
+                context: .work,
+                eventKind: .meeting
             ),
             CalendarEvent(
                 title: "School Pickup",
                 location: "Lincoln Elementary",
                 startDate: calendar.date(bySettingHour: 14, minute: 0, second: 0, of: now) ?? now,
-                endDate: calendar.date(bySettingHour: 14, minute: 30, second: 0, of: now) ?? now
+                endDate: calendar.date(bySettingHour: 14, minute: 30, second: 0, of: now) ?? now,
+                context: .personal,
+                eventKind: .personal,
+                preparationMinutes: 10,
+                travelBufferMinutes: 15
             ),
         ]
     }
@@ -99,14 +103,16 @@ public struct MockRecommendationProvider: GhostBrainServing {
                 title: "Rain expected this afternoon",
                 subtitle: "60% chance starting around 3:00 PM",
                 timestamp: now,
-                sourceAgent: .calendar
+                sourceAgent: .weather,
+                freshness: .cached
             ),
             DaySignal(
-                kind: .finance,
-                title: "Unusual charge detected",
-                subtitle: "$340 at an unfamiliar merchant",
+                kind: .conflict,
+                title: "Pickup overlaps 2:00 PM sync",
+                subtitle: "Calendar conflict detected",
                 timestamp: now,
-                sourceAgent: .finance
+                sourceAgent: .planning,
+                freshness: .live
             ),
         ]
     }

@@ -2,8 +2,7 @@ import LifePilotCore
 import LifePilotDesignSystem
 import SwiftUI
 
-/// The Timeline screen — a unified, chronological view of everything
-/// happening across connected apps, per README.md's Timeline feature.
+/// Unified chronological view of events, tasks, reminders, and planning signals.
 public struct TimelineView: View {
     @State private var viewModel: TimelineViewModel
 
@@ -34,8 +33,10 @@ public struct TimelineView: View {
     private func color(for kind: TimelineEntry.Kind) -> Color {
         switch kind {
         case .event: return Color.LifePilot.accentStart
-        case .email: return Color.LifePilot.accentEnd
         case .task: return Color.LifePilot.signalSuccess
+        case .reminder: return Color.LifePilot.accentEnd
+        case .recommendation: return Color.LifePilot.signalRisk
+        case .signal: return Color.LifePilot.textSecondary
         }
     }
 }

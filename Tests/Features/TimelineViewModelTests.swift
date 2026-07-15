@@ -9,7 +9,7 @@ final class TimelineViewModelTests: XCTestCase {
         let earlier = Date()
         let provider = StubTimelineProvider(entries: [
             TimelineEntry(date: later, title: "Later", subtitle: nil, kind: .event),
-            TimelineEntry(date: earlier, title: "Earlier", subtitle: nil, kind: .email),
+            TimelineEntry(date: earlier, title: "Earlier", subtitle: nil, kind: .task),
         ])
         let viewModel = TimelineViewModel(timelineProvider: provider)
 
@@ -19,10 +19,10 @@ final class TimelineViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.entries.map(\.date), [earlier, later])
     }
 
-    func testLoadIncludesAllEntryKinds() async {
+    func testLoadIncludesEventAndTaskKinds() async {
         let provider = StubTimelineProvider(entries: [
             TimelineEntry(date: Date(), title: "Event", subtitle: nil, kind: .event),
-            TimelineEntry(date: Date(), title: "Email", subtitle: nil, kind: .email),
+            TimelineEntry(date: Date(), title: "Task", subtitle: nil, kind: .task),
         ])
         let viewModel = TimelineViewModel(timelineProvider: provider)
 
@@ -30,7 +30,7 @@ final class TimelineViewModelTests: XCTestCase {
 
         let kinds = Set(viewModel.entries.map(\.kind))
         XCTAssertTrue(kinds.contains(.event))
-        XCTAssertTrue(kinds.contains(.email))
+        XCTAssertTrue(kinds.contains(.task))
     }
 }
 

@@ -1,7 +1,7 @@
 import Foundation
 import LifePilotCore
 
-/// Mock timeline data for Phase 3–6, until live `Services` integrations land.
+/// Mock timeline data until AppShell wires store-backed providers.
 public struct MockTimelineProvider: TimelineProviding {
     public init() {}
 
@@ -12,16 +12,8 @@ public struct MockTimelineProvider: TimelineProviding {
                 date: $0.startDate,
                 title: $0.title,
                 subtitle: $0.location,
-                kind: .event
-            )
-        }
-        let emails = MockEmail.messages(relativeTo: now).map {
-            TimelineEntry(
-                id: $0.id,
-                date: $0.receivedAt,
-                title: $0.subject,
-                subtitle: $0.sender,
-                kind: .email
+                kind: .event,
+                context: $0.context
             )
         }
         let tasks = MockTasks.items(relativeTo: now).compactMap { task -> TimelineEntry? in
@@ -31,10 +23,20 @@ public struct MockTimelineProvider: TimelineProviding {
                 date: dueDate,
                 title: task.title,
                 subtitle: "Due",
-                kind: .task
+                kind: .task,
+                context: task.context
             )
         }
+        let reminders = [
+            TimelineEntry(
+                date: now.addingTimeInterval(90 * 60),
+                title: "Take medication reminder",
+                subtitle: "Local reminder",
+                kind: .reminder,
+                context: .personal
+            ),
+        ]
 
-        return (events + emails + tasks).sorted { $0.date < $1.date }
+        return (events + tasks + reminders).sorted { $0.date < $1.date }
     }
 }

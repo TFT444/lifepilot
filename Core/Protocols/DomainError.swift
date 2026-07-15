@@ -1,9 +1,12 @@
-/// Shared error type for domain-layer failures that don't warrant their
-/// own dedicated error enum yet. Per docs/ENGINEERING_GUIDE.md's Error
-/// Handling standard, feature-specific errors should graduate to their own
-/// typed enum once they need to carry more than a message.
-public enum DomainError: Error, Sendable {
-    case notFound(String)
-    case unavailable(String)
+/// Shared domain errors. Feature-specific errors may graduate to dedicated
+/// enums once they need richer payloads (docs/ENGINEERING_GUIDE.md).
+public enum DomainError: Error, Sendable, Equatable {
+    case notFound
+    case notFoundNamed(String)
+    case unavailable
+    case unavailableNamed(String)
+    case unauthorized
+    case conflict
+    case validationFailed(field: String)
     case invalidState(String)
 }

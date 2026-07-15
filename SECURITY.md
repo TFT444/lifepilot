@@ -2,11 +2,11 @@
 
 ## Our Philosophy
 
-LifePilot is built privacy-first. It reasons over sensitive personal data — calendars, email, location, and financial signals — and that responsibility shapes every architectural decision:
+LifePilot is built privacy-first. It reasons over sensitive personal data — calendars, reminders, location, and daily schedule context — and that responsibility shapes every architectural decision:
 
 - **On-device by default.** Processing happens on-device wherever feasible.
 - **Encrypted sync.** Cross-device data is end-to-end encrypted via CloudKit.
-- **No silent execution.** High-risk actions (sending a message, booking travel, moving money) always require explicit, per-action user approval — see the [Core Philosophy](README.md#core-philosophy).
+- **No silent execution.** High-risk actions (changing calendars or reminders, booking travel) always require explicit, per-action user approval — see the [Core Philosophy](README.md#core-philosophy).
 - **Least privilege.** Each integration is granted the minimum access its agent needs to function.
 - **Auditable actions.** Every executed action is logged with the reasoning that produced it.
 

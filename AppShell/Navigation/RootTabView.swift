@@ -2,9 +2,7 @@ import LifePilotDesignSystem
 import LifePilotFeatures
 import SwiftUI
 
-/// The root `TabView`, hosting the five tabs defined in `AppTab`. Each tab
-/// wraps its screen in its own `NavigationStack`, per SwiftUI's recommended
-/// pattern for independent per-tab navigation history.
+/// Root tabs. Each tab owns an independent `NavigationStack`.
 public struct RootTabView: View {
     private let dependencies: AppDependencies
     @State private var selectedTab: AppTab = .home
@@ -39,8 +37,8 @@ public struct RootTabView: View {
                 #endif
         case .timeline:
             TimelineView(timelineProvider: dependencies.timelineProvider)
-        case .memory:
-            MemoryView()
+        case .tasks:
+            TasksView(taskStore: dependencies.taskStore)
         case .insights:
             InsightsView()
         case .settings:

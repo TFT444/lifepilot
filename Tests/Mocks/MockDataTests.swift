@@ -18,17 +18,13 @@ final class MockDataTests: XCTestCase {
         XCTAssertFalse(MockTravel.itineraries().isEmpty)
     }
 
-    func testMockFinanceProducesNonEmptyTransactions() {
-        XCTAssertFalse(MockFinance.transactions().isEmpty)
-    }
-
-    func testMockFinanceFlagsAtLeastOneAnomaly() {
-        let transactions = MockFinance.transactions()
-        XCTAssertTrue(transactions.contains { $0.isAnomalous })
-    }
-
     func testMockNotificationsProducesNonEmptyItems() {
         XCTAssertFalse(MockNotifications.items().isEmpty)
+    }
+
+    func testMockNotificationsContainNoFinanceSources() {
+        let agents = MockNotifications.items().compactMap(\.sourceAgent)
+        XCTAssertFalse(agents.contains { $0.displayName == "Finance" })
     }
 
     func testMockWeatherProducesAValidPrecipitationChance() {

@@ -1,30 +1,29 @@
 import Foundation
 import LifePilotCore
 
-/// Realistic sample notification data for previews, tests, and Phase 3's
-/// mock-driven screens.
+/// Sample notifications for previews and tests — daily-life only.
 public enum MockNotifications {
     public static func items(relativeTo now: Date = Date()) -> [NotificationItem] {
         [
             NotificationItem(
-                title: "Flight delayed",
-                body: "UA 1472 is now departing 40 minutes later than scheduled.",
+                title: "Travel update",
+                body: "Leave 15 minutes earlier for your afternoon event.",
                 receivedAt: now.addingTimeInterval(-30 * 60),
                 sourceAgent: .travel,
                 isRead: false
             ),
             NotificationItem(
-                title: "Unusual charge detected",
-                body: "A $340 charge at an unfamiliar merchant was flagged for review.",
+                title: "Task due soon",
+                body: "Send updated deck is due within three hours.",
                 receivedAt: now.addingTimeInterval(-2 * 3600),
-                sourceAgent: .finance,
+                sourceAgent: .task,
                 isRead: false
             ),
             NotificationItem(
                 title: "Morning briefing ready",
                 body: "Your day is prepared — 3 recommendations waiting.",
                 receivedAt: now.addingTimeInterval(-6 * 3600),
-                sourceAgent: nil,
+                sourceAgent: .planning,
                 isRead: true
             ),
         ]

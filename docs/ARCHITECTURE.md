@@ -19,8 +19,8 @@ LifePilot is structured as a layered system: signal collection at the edges, rea
 flowchart TD
     U[User]
     GB[Ghost Brain\nCore Reasoning Engine]
-    AG[AI Agents\nCalendar · Email · Travel · Finance · Memory ...]
-    APPS[Connected Apps\nCalendar · Mail · Maps · Weather · Reminders]
+    AG[Capabilities\nCalendar · Tasks · Travel · Weather · Memory]
+    APPS[Connected Sources\nCalendar · Reminders · Maps · Weather]
     REC[Recommendations\nRanked, Explained]
     APP[Approval\nUser Reviews & Confirms]
     EX[Execution\nAction Performed]
@@ -51,7 +51,7 @@ lifepilot/
 ├── AppShell/                 # Composition root (DI) and root navigation
 ├── Core/                     # Shared domain models and protocols
 ├── GhostBrain/               # Reasoning seam: GhostBrainServing, models, mock provider
-├── Agents/                   # Domain-specific AI agents (Calendar, Email, Travel, ...)
+├── Agents/                   # Future domain adapters (Calendar, Travel, ...); empty in current MVP
 ├── DesignSystem/             # Shared UI components, typography, tokens, theming
 ├── Features/                 # User-facing feature modules (Morning Briefing, Timeline, ...)
 ├── Services/                 # Cross-cutting infrastructure: networking, persistence, auth
@@ -136,14 +136,12 @@ classDiagram
         +request(action) ApprovedAction
     }
 
-    Agent <|-- CalendarAgent
-    Agent <|-- EmailAgent
-    Agent <|-- TravelAgent
-    Agent <|-- FinanceAgent
-    Agent <|-- MemoryAgent
-    Agent <|-- ReminderAgent
-    Agent <|-- ShoppingAgent
-    Agent <|-- HealthAgent
+    Agent <|-- CalendarCapability
+    Agent <|-- TaskCapability
+    Agent <|-- TravelCapability
+    Agent <|-- WeatherCapability
+    Agent <|-- MemoryCapability
+    Agent <|-- ReminderCapability
 
     GhostBrain --> Agent : fuses output of
     GhostBrain --> SecurityAgent : requests audit
@@ -151,20 +149,16 @@ classDiagram
     ApprovalGate --> GhostBrain : returns ApprovedAction
 ```
 
-Each agent implements a common `Agent` protocol (`observe()`, `predict(context:)`), which means:
+Capabilities implement a common observation/prediction contract. Finance, shopping, and health agents are deliberately **not** part of the MVP surface.
 
-- New agents can be added without modifying the Ghost Brain's core fusion logic.
-- Every agent is independently unit-testable, with the Ghost Brain mocked as a simple context object.
-- The `SecurityAgent` is architecturally distinct from domain agents — it doesn't propose actions, it audits *other agents'* proposed actions before they reach the Approval Gate. This keeps the "is this action safe" question centralized and auditable rather than duplicated per-agent.
-
-See the [README's AI Agent System](../README.md#ai-agent-system) for what each agent is responsible for at the product level.
+See the [README capability table](../README.md#capability-surface-daily-life-mvp) for what ships now.
 
 ## Future Scalability
 
-The layering and agent contracts above are designed to absorb three kinds of future growth without rearchitecting:
+The layering above is designed to absorb three kinds of future growth without rearchitecting:
 
-- **New agents.** Home, Social, and Work agents can be added by implementing `Agent` and registering with the Ghost Brain — no changes to `Features` or `DesignSystem` required.
-- **New surfaces.** Because `Core` and `Agents` are UI-framework-agnostic, a future web dashboard (`Website/`) or other client can reuse the same reasoning engine through a thin API layer rather than reimplementing it.
-- **New integrations.** Because `Services` depends on protocols rather than concrete SDKs, swapping or adding a data source (e.g. a new calendar provider) touches one adapter, not the reasoning core.
+- **New capabilities.** Home and Social adapters can be added behind Core protocols — no changes to `Features` or `DesignSystem` required.
+- **New surfaces.** Because `Core` is UI-framework-agnostic, a future web dashboard or other client can reuse the same planning engine.
+- **New integrations.** Because `Services` depends on protocols rather than concrete SDKs, swapping or adding a data source touches one adapter, not the planning core.
 
 As the codebase grows past what a single `Core` module can comfortably hold, domain logic will be extracted into local Swift Packages under `packages/`, each with its own tests and versioned independently — without changing the dependency rules above.

@@ -56,21 +56,21 @@ This branch already includes sync+architecture content from #23’s tip.
 - [ ] Conventional commit after slice
 
 ### Stage 2 — Scope correction (finance/commerce/health-MVP out)
-- [ ] Delete finance model + mock + tests
-- [ ] Strip finance/shopping/health from enums, signals, mocks, demos
-- [ ] Rewrite README / vision / architecture / roadmap / security language
-- [ ] Finance-removal regression scan test
+- [x] Delete finance model + mock + tests
+- [x] Strip finance/shopping/health from enums, signals, mocks, demos
+- [x] Rewrite README / architecture / roadmap / security language (vision still lean)
+- [x] Finance-removal regression scan test
 - [ ] Verify package still builds on CI
 
 ### Stage 3 — Domain contracts + offline persistence
-- [ ] Expand Core models: Task (subtasks/tags/recurrence), Event/Shift, Timeline, Evidence, Recommendation/Approval, Preference/Memory, Permission state
-- [ ] Store / Clock / ID / Executor protocols
-- [ ] In-memory + SwiftData-ready persistence for LifePilot-owned state
+- [x] Expand Core models: Task (subtasks/tags/recurrence), Event/Shift, Timeline, Evidence, Recommendation/Approval, Preference/Memory, Permission state
+- [x] Store / Clock / ID / Executor protocols
+- [x] In-memory persistence for LifePilot-owned state (SwiftData adapter pending)
 - [ ] App launch / onboarding persistence
-- [ ] Unit + migration-shaped tests
+- [x] Unit tests for planning, approvals, stores (migrations pending SwiftData)
 
 ### Stage 4 — Tasks / reminders / notifications
-- [ ] Task CRUD + lists (Inbox/Today/Upcoming/Completed)
+- [x] Task CRUD + lists (Inbox/Today/Upcoming/Completed) — Tasks tab
 - [ ] Recurrence + notification identity models
 - [ ] Notification scheduler protocol + fake for tests
 - [ ] Quick capture entry points
@@ -120,7 +120,7 @@ This branch already includes sync+architecture content from #23’s tip.
 | When | What ran | Result |
 |---|---|---|
 | 2026-07-15 | Local `swift` / `xcodebuild` | **Unavailable** on agent host |
-| (pending) | `swift build` / `swift test` via GHA | — |
+| pending | `swift build` / `swift test` via GHA after push | awaiting CI |
 
 ---
 
