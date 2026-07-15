@@ -29,6 +29,15 @@ Your calendar, inbox, weather, travel, and priorities — understood, predicted,
 | Document | Purpose |
 |---|---|
 | [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md) | The belief, principles, and long-term ambition behind LifePilot |
+| [docs/product/MVP_SCOPE.md](docs/product/MVP_SCOPE.md) | Daily-life MVP scope, non-goals, and success metrics (#26) |
+| [docs/product/INFORMATION_ARCHITECTURE.md](docs/product/INFORMATION_ARCHITECTURE.md) | Navigation and screen map (#24) |
+| [docs/product/PERSONAS.md](docs/product/PERSONAS.md) | Primary personas and scenarios (#25) |
+| [docs/design/USER_JOURNEYS.md](docs/design/USER_JOURNEYS.md) | Capture → plan → approve journeys (#28) |
+| [docs/design/ONBOARDING_PERMISSIONS.md](docs/design/ONBOARDING_PERMISSIONS.md) | Progressive permission education (#29) |
+| [docs/design/WIREFRAMES.md](docs/design/WIREFRAMES.md) | Low-fidelity MVP wireframes (#31) |
+| [docs/design/ACCESSIBILITY_NOTIFICATIONS.md](docs/design/ACCESSIBILITY_NOTIFICATIONS.md) | A11y + notification standards (#33) |
+| [docs/data/SWIFTDATA_PERSISTENCE.md](docs/data/SWIFTDATA_PERSISTENCE.md) | Offline-first persistence model (#34) |
+| [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | Living delivery checklist |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System layers, dependency rules, and the AI agent contract |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Color, typography, spacing, and component tokens |
 | [docs/ENGINEERING_GUIDE.md](docs/ENGINEERING_GUIDE.md) | MVVM, testing, error handling, logging, accessibility, performance |
