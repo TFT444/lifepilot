@@ -25,7 +25,12 @@ Request changes or leave a comment without approval if:
 
 ## Solo-maintainer note
 
-GitHub disallows self-approval by `@TFT444`. Approvals from the Cursor GitHub App / `cursor` bot are a different identity and are intended to satisfy required reviews when Bugbot + CI agree the change is safe. The human maintainer remains responsible for product judgment and for using `gh pr merge --admin` only as a documented break-glass option.
+GitHub disallows self-approval by `@TFT444` (platform hard limit). Two supported setups:
+
+1. **Solo admin merge (default intent for #7):** required approving review count `0` + admins not locked out — see `scripts/enable-solo-admin-merge.sh` and [docs/SOLO_MAINTAINER_REVIEW.md](docs/SOLO_MAINTAINER_REVIEW.md). CI remains the merge gate.
+2. **Cursor second identity:** keep required approvals ≥ 1; this policy + Approval Agents let the `cursor` bot Approve when Bugbot + CI are clean.
+
+The human maintainer remains responsible for product judgment. Prefer the green Merge button after the script; use `gh pr merge --admin` only as break-glass.
 
 ## References
 
