@@ -109,9 +109,11 @@ Full detail lives in [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md) and [docs/ENGINE
 
 ### Solo maintainer (required reading)
 
-GitHub will not let `@TFT444` approve their own PRs. Until a second human reviewer exists, LifePilot uses **Cursor Bugbot + Approval Agents** so the `cursor` bot can review and approve when policy allows.
+GitHub will not let `@TFT444` **Approve** their own PRs (hard limit). To still ship as a solo admin:
 
-- Setup steps: [docs/SOLO_MAINTAINER_REVIEW.md](docs/SOLO_MAINTAINER_REVIEW.md)
+1. Run `./scripts/enable-solo-admin-merge.sh` (sets required approvals to `0`, turns off code-owner requirement + admin lockout) — details in [docs/SOLO_MAINTAINER_REVIEW.md](docs/SOLO_MAINTAINER_REVIEW.md)
+2. Optionally keep **Cursor Bugbot + Approval Agents** when you want a second-identity Approve again
+
 - Bugbot focus: [.cursor/BUGBOT.md](.cursor/BUGBOT.md)
 - Approval rules: [APPROVAL_POLICY.md](APPROVAL_POLICY.md)
 - Related issue: [#7](https://github.com/TFT444/lifepilot/issues/7)
