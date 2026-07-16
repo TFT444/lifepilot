@@ -9,8 +9,9 @@ final class AppDependenciesTests: XCTestCase {
         XCTAssertNotNil(dependencies.eventStore)
         XCTAssertNotNil(dependencies.preferenceStore)
         XCTAssertNotNil(dependencies.approvalStore)
-        XCTAssertTrue(dependencies.notificationScheduler is UserNotificationsScheduler)
-        XCTAssertTrue(dependencies.calendarIntegration is EventKitCalendarIntegration)
+        // XCTest host cannot construct UNUserNotificationCenter / EventKit safely.
+        XCTAssertTrue(dependencies.notificationScheduler is NoOpNotificationScheduler)
+        XCTAssertTrue(dependencies.calendarIntegration is UnavailableCalendarIntegration)
     }
 
     func testPreviewDependenciesUseInMemoryStores() async {

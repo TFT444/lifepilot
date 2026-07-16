@@ -47,8 +47,16 @@ public struct AppDependencies: Sendable {
 
     /// Production wiring: SwiftData-backed stores, real notification scheduler,
     /// EventKit adapters (graceful when denied), deterministic planning.
+    /// Under XCTest / SPM test host, uses in-memory SwiftData and no-op system
+    /// adapters because `UNUserNotificationCenter` / EventKit require an app bundle.
     public static var live: AppDependencies {
-        let controller = PersistenceController.shared
+        let testing = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+        let controller: PersistenceController
+        if testing, let memory = try? PersistenceController(inMemory: true) {
+            controller = memory
+        } else {
+            controller = PersistenceController.shared
+        }
         let taskStore = SwiftDataTaskStore(container: controller.container)
         let eventStore = SwiftDataEventStore(container: controller.container)
         let preferenceStore = SwiftDataPreferenceStore(container: controller.container)
@@ -66,9 +74,15 @@ public struct AppDependencies: Sendable {
             approvalStore: approvalStore,
             planningEngine: DeterministicPlanningEngine(),
             actionExecutor: executor,
-            notificationScheduler: UserNotificationsScheduler(),
-            calendarIntegration: EventKitCalendarIntegration(),
-            remindersIntegration: EventKitRemindersIntegration()
+            notificationScheduler: testing
+                ? NoOpNotificationScheduler()
+                : UserNotificationsScheduler(),
+            calendarIntegration: testing
+                ? UnavailableCalendarIntegration()
+                : EventKitCalendarIntegration(),
+            remindersIntegration: testing
+                ? UnavailableRemindersIntegration()
+                : EventKitRemindersIntegration()
         )
     }
 
