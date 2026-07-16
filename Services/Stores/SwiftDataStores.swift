@@ -130,11 +130,15 @@ public actor LifePilotModelActor {
     }
 
     public func exportPayload() throws -> Data {
+        let preferences = try loadPreferences()
+        let memory = try fetchMemory()
+        let tasks = try fetchTasks()
+        let events = try fetchEvents()
         let payload = ExportBundle(
-            preferences: try loadPreferences(),
-            memory: try fetchMemory(),
-            tasks: try fetchTasks(),
-            events: try fetchEvents()
+            preferences: preferences,
+            memory: memory,
+            tasks: tasks,
+            events: events
         )
         return try JSONEncoder().encode(payload)
     }

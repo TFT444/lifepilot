@@ -5,7 +5,7 @@ import XCTest
 
 @MainActor
 final class HomeViewModelTests: XCTestCase {
-    func testLoadUsesStoresAndPlanningFindings() async throws {
+    func testLoadUsesStoresAndPlanningFindings() async {
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         let taskStore = InMemoryTaskStore(seed: [
             TaskItem(title: "Ship brief", dueDate: now.addingTimeInterval(-600)),

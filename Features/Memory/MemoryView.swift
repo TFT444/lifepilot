@@ -12,72 +12,84 @@ public struct MemoryView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                TextField("Title", text: $viewModel.draftTitle)
-                    .textFieldStyle(.roundedBorder)
-                Picker("Kind", selection: $viewModel.draftKind) {
-                    ForEach(MemoryItem.Kind.allCases, id: \.self) { kind in
-                        Text(kind.rawValue).tag(kind)
-                    }
-                }
-                Button("Add") {
-                    Task { try? await viewModel.addDraft() }
-                }
-                .disabled(viewModel.draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            }
-            .padding(Spacing.lg)
-
-            if viewModel.items.isEmpty {
-                EmptyStateView(
-                    symbolName: "brain.head.profile",
-                    message: "Save preferences, routines, places, and corrections you choose — "
-                        + "LifePilot never promotes a one-off action into permanent memory."
-                )
-                .frame(maxHeight: .infinity)
-            } else {
-                List {
-                    ForEach(viewModel.items) { item in
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text(item.title)
-                                    .font(.LifePilot.body)
-                                if item.isPinned {
-                                    Image(systemName: "pin.fill")
-                                        .foregroundStyle(Color.LifePilot.accentEnd)
-                                }
-                            }
-                            Text(item.kind.rawValue)
-                                .font(.LifePilot.caption)
-                                .foregroundStyle(Color.LifePilot.textSecondary)
-                            if let detail = item.detail {
-                                Text(detail)
-                                    .font(.LifePilot.caption)
-                                    .foregroundStyle(Color.LifePilot.textSecondary)
-                            }
-                            Text("Provenance: \(item.provenance)")
-                                .font(.caption2)
-                                .foregroundStyle(Color.LifePilot.textSecondary)
-                        }
-                        .swipeActions {
-                            Button(role: .destructive) {
-                                Task { try? await viewModel.forget(item) }
-                            } label: {
-                                Label("Forget", systemImage: "trash")
-                            }
-                            Button {
-                                Task { try? await viewModel.togglePin(item) }
-                            } label: {
-                                Label(item.isPinned ? "Unpin" : "Pin", systemImage: "pin")
-                            }
-                        }
-                    }
-                }
-                .listStyle(.plain)
-            }
+            composer
+            content
         }
         .background(Color.LifePilot.backgroundPrimary)
         .navigationTitle("Memory")
         .task { await viewModel.load() }
+    }
+
+    private var composer: some View {
+        HStack {
+            TextField("Title", text: $viewModel.draftTitle)
+                .textFieldStyle(.roundedBorder)
+            Picker("Kind", selection: $viewModel.draftKind) {
+                ForEach(MemoryItem.Kind.allCases, id: \.self) { kind in
+                    Text(kind.rawValue).tag(kind)
+                }
+            }
+            Button("Add") {
+                Task { try? await viewModel.addDraft() }
+            }
+            .disabled(viewModel.draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }
+        .padding(Spacing.lg)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if viewModel.items.isEmpty {
+            EmptyStateView(
+                symbolName: "brain.head.profile",
+                message: "Save preferences, routines, places, and corrections you choose — "
+                    + "LifePilot never promotes a one-off action into permanent memory."
+            )
+            .frame(maxHeight: .infinity)
+        } else {
+            List {
+                ForEach(viewModel.items) { item in
+                    memoryRow(item)
+                }
+            }
+            .listStyle(.plain)
+        }
+    }
+
+    private func memoryRow(_ item: MemoryItem) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(item.title)
+                    .font(.LifePilot.body)
+                if item.isPinned {
+                    Image(systemName: "pin.fill")
+                        .foregroundStyle(Color.LifePilot.accentEnd)
+                }
+            }
+            Text(item.kind.rawValue)
+                .font(.LifePilot.caption)
+                .foregroundStyle(Color.LifePilot.textSecondary)
+            if let detail = item.detail {
+                Text(detail)
+                    .font(.LifePilot.caption)
+                    .foregroundStyle(Color.LifePilot.textSecondary)
+            }
+            Text("Provenance: \(item.provenance)")
+                .font(.caption2)
+                .foregroundStyle(Color.LifePilot.textSecondary)
+        }
+        .swipeActions {
+            Button(role: .destructive) {
+                Task { try? await viewModel.forget(item) }
+            } label: {
+                Label("Forget", systemImage: "trash")
+            }
+            Button {
+                Task { try? await viewModel.togglePin(item) }
+            } label: {
+                Label(item.isPinned ? "Unpin" : "Pin", systemImage: "pin")
+            }
+        }
     }
 }
 

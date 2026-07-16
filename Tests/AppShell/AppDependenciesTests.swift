@@ -3,7 +3,7 @@ import XCTest
 @testable import LifePilotServices
 
 final class AppDependenciesTests: XCTestCase {
-    func testLiveDependenciesWireSwiftDataStores() async {
+    func testLiveDependenciesWireSwiftDataStores() {
         let dependencies = AppDependencies.live
         XCTAssertNotNil(dependencies.taskStore)
         XCTAssertNotNil(dependencies.eventStore)
@@ -13,7 +13,7 @@ final class AppDependenciesTests: XCTestCase {
         XCTAssertTrue(dependencies.calendarIntegration is EventKitCalendarIntegration)
     }
 
-    func testPreviewDependenciesUseInMemoryStores() async throws {
+    func testPreviewDependenciesUseInMemoryStores() async {
         let dependencies = AppDependencies.preview
         let tasks = await dependencies.taskStore.allTasks()
         XCTAssertFalse(tasks.isEmpty)

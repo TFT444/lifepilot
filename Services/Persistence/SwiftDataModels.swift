@@ -2,8 +2,8 @@ import Foundation
 import LifePilotCore
 import SwiftData
 
-/// SwiftData entities for LifePilot-owned records. Domain structs in Core stay
-/// framework-agnostic; these models are the on-disk representation.
+// SwiftData entities for LifePilot-owned records. Domain structs in Core stay
+// framework-agnostic; these models are the on-disk representation.
 
 @Model
 public final class PersistedTaskEntity {
@@ -261,7 +261,7 @@ enum PersistenceCoding {
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()
 
-    static func encode<T: Encodable>(_ value: T) -> Data {
+    static func encode(_ value: some Encodable) -> Data {
         (try? encoder.encode(value)) ?? Data()
     }
 

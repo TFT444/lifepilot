@@ -10,7 +10,9 @@ public enum LoadableState<Value: Sendable>: Sendable {
     case failed(message: String)
 
     public var isLoading: Bool {
-        if case .loading = self { return true }
+        if case .loading = self {
+            return true
+        }
         return false
     }
 

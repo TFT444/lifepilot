@@ -47,26 +47,46 @@ public final class HomeViewModel {
 
         let now = clock.now()
         let preferences = await preferenceStore.loadPreferences()
-        var events = await eventStore.allEvents()
         let tasks = await taskStore.allTasks()
+        let hydrated = await hydrateEvents(now: now)
+        applyBriefing(now: now, preferences: preferences, tasks: tasks, events: hydrated.events)
+        freshnessSummary = hydrated.notes.joined(separator: " · ")
+        lastUpdated = now
+        loadState = recommendations.isEmpty && upcomingEvents.isEmpty && topTasks.isEmpty
+            ? .empty
+            : .loaded(true)
+    }
 
-        var freshnessNotes: [String] = ["Local data"]
+    public func refresh() async {
+        await load()
+    }
+
+    private func hydrateEvents(now: Date) async -> (events: [CalendarEvent], notes: [String]) {
+        var events = await eventStore.allEvents()
+        var notes = ["Local data"]
         let calendarState = await calendarIntegration.authorizationState()
         if calendarState == .authorized || calendarState == .limited {
             let dayStart = Calendar.current.startOfDay(for: now)
             let dayEnd = Calendar.current.date(byAdding: .day, value: 2, to: dayStart) ?? now
             if let remote = try? await calendarIntegration.fetchEvents(from: dayStart, to: dayEnd) {
                 events = mergeEvents(local: events, remote: remote)
-                freshnessNotes.append("Calendar connected")
+                notes.append("Calendar connected")
             } else {
-                freshnessNotes.append("Calendar unavailable — showing local")
+                notes.append("Calendar unavailable — showing local")
             }
         } else if calendarState == .denied {
-            freshnessNotes.append("Calendar denied")
+            notes.append("Calendar denied")
         }
+        return (events, notes)
+    }
 
-        let openTasks = tasks.filter { !$0.isCompleted }
-        topTasks = openTasks
+    private func applyBriefing(
+        now: Date,
+        preferences: UserPreferences,
+        tasks: [TaskItem],
+        events: [CalendarEvent]
+    ) {
+        topTasks = tasks.filter { !$0.isCompleted }
             .sorted { lhs, rhs in
                 (lhs.dueDate ?? .distantFuture, lhs.priority) < (rhs.dueDate ?? .distantFuture, rhs.priority)
             }
@@ -85,28 +105,16 @@ public final class HomeViewModel {
             preferences: preferences,
             now: now
         )
-
         recommendations = findings.prefix(6).map { finding in
-            let evidence = finding.evidence.first?.summary ?? finding.detail
-            return BriefingCard.Content(
+            BriefingCard.Content(
                 title: finding.title,
-                reasoning: evidence,
+                reasoning: finding.evidence.first?.summary ?? finding.detail,
                 sourceAgent: finding.evidence.first?.sourceAgent ?? .planning,
                 riskBadgeText: finding.riskLevel == .low ? nil : finding.riskLevel.rawValue.capitalized
             )
         }
-
         greeting = Self.greeting(for: now)
         dateText = now.formatted(.dateTime.weekday(.wide).month(.wide).day())
-        freshnessSummary = freshnessNotes.joined(separator: " · ")
-        lastUpdated = now
-        loadState = recommendations.isEmpty && upcomingEvents.isEmpty && topTasks.isEmpty
-            ? .empty
-            : .loaded(true)
-    }
-
-    public func refresh() async {
-        await load()
     }
 
     private func mergeEvents(local: [CalendarEvent], remote: [CalendarEvent]) -> [CalendarEvent] {

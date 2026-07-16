@@ -6,14 +6,7 @@ public final class PersistenceController: @unchecked Sendable {
     public let container: ModelContainer
     public let isInMemory: Bool
 
-    public static let shared: PersistenceController = {
-        do {
-            return try PersistenceController(inMemory: false)
-        } catch {
-            // Corrupt store / sandbox issues: fall back so the app still launches.
-            return try! PersistenceController(inMemory: true)
-        }
-    }()
+    public static let shared = PersistenceController.makeShared()
 
     public init(inMemory: Bool = false) throws {
         let schema = Schema([
@@ -30,6 +23,16 @@ public final class PersistenceController: @unchecked Sendable {
             isStoredInMemoryOnly: inMemory
         )
         container = try ModelContainer(for: schema, configurations: [configuration])
-        self.isInMemory = inMemory
+        isInMemory = inMemory
+    }
+
+    private static func makeShared() -> PersistenceController {
+        if let disk = try? PersistenceController(inMemory: false) {
+            return disk
+        }
+        if let memory = try? PersistenceController(inMemory: true) {
+            return memory
+        }
+        preconditionFailure("Unable to create LifePilot PersistenceController")
     }
 }
