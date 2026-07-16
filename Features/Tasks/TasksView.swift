@@ -72,7 +72,7 @@ public struct TasksView: View {
                                 } label: {
                                     Label("1h", systemImage: "clock.arrow.circlepath")
                                 }
-                                .tint(Color.LifePilot.signalWarning)
+                                .tint(Color.LifePilot.accentEnd)
                             }
                     }
                 }

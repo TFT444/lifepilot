@@ -201,7 +201,11 @@ public struct SwiftDataTaskStore: TaskStore {
     }
 
     public func allTasks() async -> [TaskItem] {
-        (try? await actor.fetchTasks()) ?? []
+        do {
+            return try await actor.fetchTasks()
+        } catch {
+            return []
+        }
     }
 
     public func save(_ task: TaskItem) async throws {
@@ -225,7 +229,7 @@ public struct SwiftDataEventStore: EventStore {
     }
 
     public func allEvents() async -> [CalendarEvent] {
-        (try? await actor.fetchEvents()) ?? []
+        await (try? actor.fetchEvents()) ?? []
     }
 
     public func save(_ event: CalendarEvent) async throws {
@@ -245,7 +249,7 @@ public struct SwiftDataPreferenceStore: PreferenceStore {
     }
 
     public func loadPreferences() async -> UserPreferences {
-        (try? await actor.loadPreferences()) ?? UserPreferences()
+        await (try? actor.loadPreferences()) ?? UserPreferences()
     }
 
     public func savePreferences(_ preferences: UserPreferences) async throws {
@@ -253,7 +257,7 @@ public struct SwiftDataPreferenceStore: PreferenceStore {
     }
 
     public func allMemory() async -> [MemoryItem] {
-        (try? await actor.fetchMemory()) ?? []
+        await (try? actor.fetchMemory()) ?? []
     }
 
     public func saveMemory(_ item: MemoryItem) async throws {
@@ -285,7 +289,7 @@ public struct SwiftDataApprovalStore: ApprovalStore {
     }
 
     public func all() async -> [(ActionProposal, ApprovalRecord)] {
-        (try? await actor.fetchApprovals()) ?? []
+        await (try? actor.fetchApprovals()) ?? []
     }
 
     public func appendAudit(_ event: AuditEvent) async throws {
@@ -293,6 +297,6 @@ public struct SwiftDataApprovalStore: ApprovalStore {
     }
 
     public func auditTrail() async -> [AuditEvent] {
-        (try? await actor.fetchAudit()) ?? []
+        await (try? actor.fetchAudit()) ?? []
     }
 }
