@@ -10,6 +10,8 @@ For the product philosophy behind these phases, see [docs/PRODUCT_VISION.md](doc
 
 ---
 
+> **Scope correction (2026-07-15):** Finance, shopping/commerce, and HealthKit medical intelligence are **removed** from the shipping MVP. Email content ingestion and automatic sending are not MVP dependencies. See `docs/IMPLEMENTATION_STATUS.md` and `.cursor/rules/lifepilot-mvp.mdc`. Historical Phase 6 agent roster language below is superseded for daily-life MVP delivery.
+
 ## How to read this document
 
 Each phase follows the same template:
@@ -487,15 +489,14 @@ Ghost Brain is only as useful as the signals it receives. This phase populates t
 ### Deliverables
 
 - Calendar Agent
-- Email Agent
 - Travel Agent
-- Finance Agent
-- Reminder Agent
+- Reminder / Task Agent
 - Memory Agent
-- Health Agent
-- Shopping Agent
+- Weather Agent
 - Security Agent
 - Notification Agent
+
+> **Superseded for MVP:** Email content ingestion, Finance, Shopping, and Health agents are **not** shipping. Do not implement them.
 
 ### Technical Requirements
 
@@ -516,7 +517,7 @@ Ghost Brain is only as useful as the signals it receives. This phase populates t
 
 | Risk | Mitigation |
 |---|---|
-| Agent roster grows faster than Ghost Brain's fusion logic can meaningfully use it | Sequence agents by value: Calendar/Email/Travel first (highest signal density), Shopping/Health later |
+| Agent roster grows faster than Ghost Brain's fusion logic can meaningfully use it | Sequence agents by value: Calendar/Reminders/Travel/Weather first (highest daily-life signal density) |
 | Security Agent becomes a bottleneck or a rubber stamp | Security Agent's audit logic is tested against both should-block and should-allow cases, not just happy-path approval |
 
 ### Dependencies
@@ -565,10 +566,10 @@ Phases 5–6 can be built and tested against synthetic data, but LifePilot only 
 - MapKit
 - Contacts
 - Notifications
-- HealthKit
-- CloudKit (sync)
-- Authentication
-- Supabase (backend, auth, sync infrastructure)
+- CloudKit (optional sync)
+- Authentication (optional account)
+- ~~HealthKit~~ — deferred, not MVP
+- ~~Supabase as required backend~~ — local-first; cloud optional
 
 ### Technical Requirements
 

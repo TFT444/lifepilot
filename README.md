@@ -29,6 +29,15 @@ Your calendar, inbox, weather, travel, and priorities — understood, predicted,
 | Document | Purpose |
 |---|---|
 | [docs/PRODUCT_VISION.md](docs/PRODUCT_VISION.md) | The belief, principles, and long-term ambition behind LifePilot |
+| [docs/product/MVP_SCOPE.md](docs/product/MVP_SCOPE.md) | Daily-life MVP scope, non-goals, and success metrics (#26) |
+| [docs/product/INFORMATION_ARCHITECTURE.md](docs/product/INFORMATION_ARCHITECTURE.md) | Navigation and screen map (#24) |
+| [docs/product/PERSONAS.md](docs/product/PERSONAS.md) | Primary personas and scenarios (#25) |
+| [docs/design/USER_JOURNEYS.md](docs/design/USER_JOURNEYS.md) | Capture → plan → approve journeys (#28) |
+| [docs/design/ONBOARDING_PERMISSIONS.md](docs/design/ONBOARDING_PERMISSIONS.md) | Progressive permission education (#29) |
+| [docs/design/WIREFRAMES.md](docs/design/WIREFRAMES.md) | Low-fidelity MVP wireframes (#31) |
+| [docs/design/ACCESSIBILITY_NOTIFICATIONS.md](docs/design/ACCESSIBILITY_NOTIFICATIONS.md) | A11y + notification standards (#33) |
+| [docs/data/SWIFTDATA_PERSISTENCE.md](docs/data/SWIFTDATA_PERSISTENCE.md) | Offline-first persistence model (#34) |
+| [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | Living delivery checklist |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System layers, dependency rules, and the AI agent contract |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Color, typography, spacing, and component tokens |
 | [docs/ENGINEERING_GUIDE.md](docs/ENGINEERING_GUIDE.md) | MVVM, testing, error handling, logging, accessibility, performance |
@@ -75,10 +84,9 @@ Modern digital life is fragmented across systems that were never designed to tal
 | Conditions | Weather |
 | Thoughts | Notes |
 | Obligations | Tasks / Reminders |
-| Money | Banking apps |
 | Movement | Travel / booking apps |
 
-Each of these systems is a silo. Each requires a separate mental model, a separate check-in, a separate moment of context-switching. None of them know that a 9 AM flight delay affects a 10 AM meeting, that a calendar conflict should trigger an email reply, or that rain this afternoon should move an outdoor lunch indoors.
+Each of these systems is a silo. Each requires a separate mental model, a separate check-in, a separate moment of context-switching. None of them know that a 9 AM flight delay affects a 10 AM meeting, that a calendar conflict needs a travel buffer, or that rain this afternoon should move an outdoor lunch indoors.
 
 The result is **cognitive overhead by design**: the user becomes the integration layer, manually cross-referencing eight applications every day just to answer one question — *"What does today actually require of me?"*
 
@@ -92,9 +100,9 @@ LifePilot introduces a single intelligent layer that sits above the tools a pers
 
 **LifePilot does not replace apps. It orchestrates them.**
 
-It reads context from the systems already in use — calendar, email, maps, weather, notes, reminders — reasons over that context as a whole, and produces a single, coherent understanding of the day. Where existing apps stop at *displaying* information, LifePilot goes further: it *connects* the information, *predicts* what will matter, and *prepares* a plan, surfacing recommended actions the user can approve with a tap.
+It reads context from the systems already in use — calendar, reminders, maps, weather, notes — reasons over that context as a whole, and produces a single, coherent understanding of the day. Where existing apps stop at *displaying* information, LifePilot goes further: it *connects* the information, *predicts* what will matter, and *prepares* a plan, surfacing recommended actions the user can approve with a tap.
 
-The philosophy is deliberate: augment the existing ecosystem, don't fight it. Calendar apps stay the source of truth for events. Email stays the source of truth for messages. LifePilot becomes the source of truth for *what it all means, together*.
+The philosophy is deliberate: augment the existing ecosystem, don't fight it. Calendar apps stay the source of truth for events. Reminders stay the source of truth for Apple reminders when connected. LifePilot becomes the source of truth for *what it all means, together*.
 
 ---
 
@@ -142,102 +150,26 @@ This loop — not a chat window — is the product.
 
 | Feature | Description |
 |---|---|
-| **Morning Briefing** | A single, generated summary of the day — schedule, priorities, weather, travel, and flagged risks — ready before the user wakes up. |
-| **Timeline** | A unified, chronological view of everything happening across every connected app, merged into one stream. |
-| **Memory** | Long-term context about the user's preferences, routines, and relationships, used to make every prediction more personal over time. |
-| **Smart Approvals** | A single queue of recommended actions, each with reasoning attached, approved or dismissed with one tap. |
-| **Context Awareness** | Understands relationships between events — a delayed flight affects a meeting; a cancelled meeting frees up focus time. |
-| **Predictive Planning** | Surfaces conflicts, risks, and opportunities before they happen, not after. |
-| **AI Agents** | Domain-specific agents (calendar, email, travel, finance, and more) that reason within their domain and report to the core system. |
-| **Insights** | Patterns in how the user spends time, communicates, and plans — surfaced as periodic, actionable summaries. |
-| **Automation** | Optional, user-defined rules that let low-risk, high-confidence actions execute without manual approval. |
-| **Privacy** | On-device processing wherever possible, end-to-end encryption for synced data, and zero silent execution. |
+| **Morning Briefing** | Schedule, priorities, weather, travel buffers, conflicts, and preparation needs — with freshness and source attribution. |
+| **Tasks & Reminders** | Inbox, Today, Upcoming, and Completed lists with quick capture and offline persistence. |
+| **Timeline** | Unified chronological stream of events, tasks, reminders, and planning signals. |
+| **Planning intelligence** | Deterministic rules for conflicts, insufficient buffers, overdue work, overload, and work-hour boundary issues. |
+| **Recommendations & Approvals** | Explainable suggestions with evidence; every external write is gated, revalidated, and audited. |
+| **Memory & Preferences** | User-controlled routines, places, people, work patterns, and corrections. |
+| **Insights** | Time allocation, meeting load, focus time, and work/life patterns when enough data exists. |
+| **Privacy controls** | Least privilege, sensitive notification previews off by default, export and delete of LifePilot-owned data. |
 
----
+**Not in scope:** banking/finance/commerce, HealthKit medical intelligence, Apple Mail ingestion, or automatic message sending.
 
-## Product Preview
-
-> **Interactive demo:** [lifepilot demo on GitHub Pages](https://tft444.github.io/lifepilot/) · [CDN mirror](https://cdn.jsdelivr.net/gh/TFT444/lifepilot@gh-pages/index.html)  
-> Splash → Onboarding → Morning Briefing → Timeline. Mock data from Phase 3.  
-> If the Pages link 404s, enable **Settings → Pages → `gh-pages` branch** once.
-
-| Morning Briefing (iPhone) | Timeline (Desktop) |
-|:---:|:---:|
-| *Use the [interactive demo](https://cdn.jsdelivr.net/gh/TFT444/lifepilot@gh-pages/index.html)* | *Same demo — toggle theme in header* |
-
-| Dark Mode | Smart Approvals |
-|:---:|:---:|
-| *Toggle in demo header* | *Approve/Dismiss on Home screen* |
+See `docs/IMPLEMENTATION_STATUS.md` for what is implemented versus planned.
 
 ---
 
 ## Architecture Overview
 
-LifePilot is structured as a layered system: signal collection at the edges, reasoning at the core, and execution gated behind explicit human approval.
+LifePilot uses offline-first domain stores, deterministic planning, and an approval-gated executor. Composition: `App → AppShell → Features → Core protocols ← Services`.
 
-<div align="center">
-
-<img src="Assets/brand/architecture.svg" alt="LifePilot system architecture: user through Ghost Brain, nine AI agents, context intelligence, recommendation engine, human approval, and connected Apple services, looping back through a learning system" width="640" />
-
-**[View the animated walkthrough →](https://claude.ai/code/artifact/42b476cf-34a1-4408-9479-5eb42bc7da69)**
-
-</div>
-
-The Mermaid diagram below is the same architecture in a more compact, text-searchable form:
-
-```mermaid
-flowchart TD
-    U[User]
-    GB[Ghost Brain\nCore Reasoning Engine]
-    AG[AI Agents\nCalendar · Email · Travel · Finance · Memory ...]
-    APPS[Connected Apps\nCalendar · Mail · Maps · Weather · Reminders]
-    REC[Recommendations\nRanked, Explained]
-    APP[Approval\nUser Reviews & Confirms]
-    EX[Execution\nAction Performed]
-
-    U --> GB
-    GB --> AG
-    AG --> APPS
-    APPS --> AG
-    AG --> GB
-    GB --> REC
-    REC --> APP
-    APP -->|approved| EX
-    APP -->|rejected| GB
-    EX --> U
-
-    style GB fill:#533483,color:#fff
-    style AG fill:#0f3460,color:#fff
-    style APPS fill:#16213e,color:#fff
-    style REC fill:#1a1a2e,color:#fff
-    style APP fill:#e94560,color:#fff
-    style EX fill:#0f3460,color:#fff
-```
-
-**Ghost Brain** is the core reasoning engine — the system that fuses signals from every agent into one model of "today," produces predictions, and ranks recommendations. It is deliberately decoupled from any single app integration, so new agents and data sources can be added without changing the reasoning core.
-
-No execution step is reachable without passing through **Approval**. This is an architectural guarantee, not a UI convention.
-
----
-
-## AI Agent System
-
-LifePilot's intelligence is composed of specialized agents, each responsible for reasoning within one domain and reporting structured findings to the Ghost Brain.
-
-| Agent | Responsibility |
-|---|---|
-| **Calendar Agent** | Reads events, detects conflicts, identifies free time, and flags scheduling risk. |
-| **Email Agent** | Triages messages by urgency, drafts suggested replies, and surfaces items needing a decision. |
-| **Travel Agent** | Tracks flights and reservations, predicts delays, and recalculates itineraries in real time. |
-| **Finance Agent** | Monitors spending patterns and upcoming bills, and flags anomalies worth attention. |
-| **Memory Agent** | Maintains long-term context — preferences, relationships, routines — shared across all agents. |
-| **Reminder Agent** | Converts stated and inferred intentions into time-aware, prioritized reminders. |
-| **Shopping Agent** | Tracks recurring needs and price-sensitive purchases, and prepares — never places — orders. |
-| **Health Agent** | Correlates sleep, activity, and schedule density to recommend realistic, sustainable plans. |
-| **Security Agent** | Audits every proposed action for risk before it reaches the Approval queue. |
-| **Ghost Brain** | The orchestrator. Fuses every agent's output into one coherent model of the day and ranks what matters. |
-
-Each agent is independently testable and independently replaceable — a deliberate design choice that keeps the system extensible as new domains (health, home, finance) come online.
+Optional AI enhancement is protocol-backed and disabled by default — no API secrets in the client. Calendar and Reminders remain sources of truth when connected.
 
 ---
 
@@ -245,45 +177,12 @@ Each agent is independently testable and independently replaceable — a deliber
 
 ```
 lifepilot/
-├── App/                       # SwiftUI application entry point, scenes, app icon
-├── Core/                      # Ghost Brain reasoning engine and shared domain models
-├── Agents/                    # Domain-specific AI agents
-│   ├── CalendarAgent/
-│   ├── EmailAgent/
-│   ├── TravelAgent/
-│   ├── FinanceAgent/
-│   ├── MemoryAgent/
-│   ├── ReminderAgent/
-│   ├── ShoppingAgent/
-│   ├── HealthAgent/
-│   └── SecurityAgent/
-├── DesignSystem/              # Shared UI components, typography, tokens, theming
-├── Features/                  # User-facing feature modules (Morning Briefing, Timeline, ...)
-├── Services/                  # Cross-cutting infrastructure: networking, persistence, auth
-├── Resources/                 # Localization and configuration
-├── Assets/
-│   └── brand/                 # LifePilot logo and mark — source of truth for all derived icons
-├── Tests/                     # Unit and integration tests, mirroring the structure above
-├── Examples/                  # Minimal, runnable examples of agent and service usage
-├── Scripts/                   # Developer tooling: setup, codegen, release scripts
-├── packages/                  # Local Swift Packages shared across targets
-├── Website/                   # Companion marketing/web dashboard (future)
-├── docs/                      # Architecture, product, and engineering documentation
-├── .github/
-│   ├── ISSUE_TEMPLATE/        # Bug, feature, task, docs, performance, security, question
-│   ├── workflows/             # CI pipelines: build, lint, test, release
-│   ├── CODEOWNERS
-│   └── PULL_REQUEST_TEMPLATE.md
-├── CONTRIBUTING.md
-├── CODE_OF_CONDUCT.md
-├── SECURITY.md
-├── MASTER_ROADMAP.md
-├── CHANGELOG.md
-├── LICENSE
-└── README.md
+├── App/ AppShell/ Core/ GhostBrain/ DesignSystem/ Features/ Services/ Mocks/
+├── Tests/ Website/public/ demo/ docs/ .github/
+└── docs/IMPLEMENTATION_STATUS.md
 ```
 
-Full explanation of every directory, the dependency rules between them, and the layered architecture they express lives in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Full dependency rules: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
@@ -293,9 +192,9 @@ Full explanation of every directory, the dependency rules between them, and the 
 |---|---|---|
 | Client UI | **SwiftUI** | Native iOS and macOS interface |
 | Development | **Cursor**, **Claude Code** | AI-assisted engineering workflow |
-| Backend | **Supabase** | Auth, database, and sync infrastructure |
-| Intelligence | **OpenAI** | Core reasoning and language understanding |
-| Sync | **CloudKit** | Cross-device state and offline continuity |
+| Persistence | **SwiftData** (planned) / in-memory stores (current) | Offline-first LifePilot-owned state |
+| Optional AI | **Server-side gateway only** | Disabled by default; never embeds secrets |
+| Sync | **CloudKit** (optional, future) | Additive; never required for local use |
 | Context | **WeatherKit** | Weather-aware predictions |
 | Context | **MapKit** | Location, travel time, and routing awareness |
 | CI/CD | **GitHub Actions** | Automated build, test, and release pipelines |
@@ -402,7 +301,7 @@ LifePilot is designed privacy-first, from data handling to execution. Full polic
 
 - **On-device by default.** Reasoning and data processing happen on-device wherever feasible; nothing is sent off-device that doesn't need to be.
 - **Encrypted sync.** Any data synced across devices is end-to-end encrypted via CloudKit.
-- **No silent execution.** LifePilot never performs a high-risk action — sending a message, making a booking, moving money — without explicit, per-action user approval. This is enforced architecturally — see [ARCHITECTURE.md](docs/ARCHITECTURE.md#dependency-rules).
+- **No silent execution.** LifePilot never performs a high-risk action — changing a calendar event or reminder — without explicit, per-action user approval. This is enforced architecturally — see [ARCHITECTURE.md](docs/ARCHITECTURE.md#dependency-rules).
 - **Least-privilege integrations.** Each connected app is granted the minimum access required for its agent to function.
 - **Auditable actions.** Every executed action is logged with the reasoning that produced it, visible to the user at any time.
 

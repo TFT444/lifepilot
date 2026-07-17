@@ -1,12 +1,33 @@
+import LifePilotCore
 import XCTest
 @testable import LifePilotAppShell
+@testable import LifePilotServices
 
 final class AppDependenciesTests: XCTestCase {
-    func testLiveDependenciesProvideAWorkingGhostBrain() async throws {
+    func testLiveDependenciesWireSwiftDataStores() {
         let dependencies = AppDependencies.live
+        XCTAssertNotNil(dependencies.taskStore)
+        XCTAssertNotNil(dependencies.eventStore)
+        XCTAssertNotNil(dependencies.preferenceStore)
+        XCTAssertNotNil(dependencies.approvalStore)
+        // XCTest host cannot construct UNUserNotificationCenter / EventKit safely.
+        XCTAssertTrue(dependencies.notificationScheduler is NoOpNotificationScheduler)
+        XCTAssertTrue(dependencies.calendarIntegration is UnavailableCalendarIntegration)
+    }
 
-        let model = try await dependencies.ghostBrain.currentModel()
+    func testPreviewDependenciesUseInMemoryStores() async {
+        let dependencies = AppDependencies.preview
+        let tasks = await dependencies.taskStore.allTasks()
+        XCTAssertFalse(tasks.isEmpty)
+    }
 
-        XCTAssertFalse(model.recommendations.isEmpty)
+    func testLiveGhostBrainIsDeterministicUnavailable() async {
+        let dependencies = AppDependencies.live
+        do {
+            _ = try await dependencies.ghostBrain.currentModel()
+            XCTFail("GhostBrainService should stay unavailable; use planning engine")
+        } catch {
+            // expected
+        }
     }
 }
