@@ -94,14 +94,17 @@ public final class TasksViewModel {
         updated.completedAt = updated.isCompleted ? clock.now() : nil
         updated.updatedAt = clock.now()
         // Completing a recurring task advances to the next occurrence instead of closing the series.
-        if updated.isCompleted, let advanced = RecurrenceEngine.skipOne(task, now: clock.now()) {
-            var next = advanced
-            next.isCompleted = false
-            next.completedAt = nil
-            try await taskStore.save(next)
-        } else {
-            try await taskStore.save(updated)
+        if updated.isCompleted {
+            if let advanced = RecurrenceEngine.skipOne(task, now: clock.now()) {
+                var next = advanced
+                next.isCompleted = false
+                next.completedAt = nil
+                try await taskStore.save(next)
+                await load()
+                return
+            }
         }
+        try await taskStore.save(updated)
         await load()
     }
 

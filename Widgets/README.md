@@ -6,7 +6,10 @@ Widget timeline providers and SwiftUI views live in `AppShell/Widgets/TodayUpcom
 
 1. In Xcode, add a **Widget Extension** target (`LifePilotWidgets`).
 2. Depend on the local `LifePilotAppShell` package product.
-3. Add a `@main` bundle:
+3. Add a `@main` bundle that hosts `TodayBriefingWidget` and `UpcomingAgendaWidget`.
+4. Use background task id `com.lifepilot.app.briefing.refresh` (already registered in-app) if you want refreshes after briefing updates.
+
+Example bundle:
 
 ```swift
 import SwiftUI
@@ -21,5 +24,3 @@ struct LifePilotWidgetBundle: WidgetBundle {
     }
 }
 ```
-
-4. Use background task id `com.lifepilot.app.briefing.refresh` (already registered in-app) if you want refreshes after briefing updates.

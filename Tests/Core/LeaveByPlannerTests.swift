@@ -7,9 +7,9 @@ final class LeaveByPlannerTests: XCTestCase {
         let now = Date(timeIntervalSince1970: 1_700_000_000)
         let event = CalendarEvent(
             title: "Client visit",
+            location: "Office",
             startDate: now.addingTimeInterval(3600),
-            endDate: now.addingTimeInterval(5400),
-            location: "Office"
+            endDate: now.addingTimeInterval(5400)
         )
         let finding = LeaveByPlanner.finding(
             for: event,

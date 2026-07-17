@@ -6,14 +6,16 @@ import SwiftUI
 public struct HomeView: View {
     @State private var viewModel: HomeViewModel
 
+    public init(viewModel: HomeViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
+
     public init(
         taskStore: any TaskStore,
         eventStore: any EventStore,
         preferenceStore: any PreferenceStore,
         planningEngine: any PlanningEngine = DeterministicPlanningEngine(),
-        calendarIntegration: any CalendarIntegrating = UnavailableCalendarIntegration(),
-        weatherIntegration: any WeatherIntegrating = UnavailableWeatherIntegration(),
-        travelIntegration: any TravelTimeIntegrating = UnavailableTravelTimeIntegration()
+        integrations: HomeBriefingIntegrations = HomeBriefingIntegrations()
     ) {
         _viewModel = State(
             initialValue: HomeViewModel(
@@ -21,9 +23,7 @@ public struct HomeView: View {
                 eventStore: eventStore,
                 preferenceStore: preferenceStore,
                 planningEngine: planningEngine,
-                calendarIntegration: calendarIntegration,
-                weatherIntegration: weatherIntegration,
-                travelIntegration: travelIntegration
+                integrations: integrations
             )
         )
     }

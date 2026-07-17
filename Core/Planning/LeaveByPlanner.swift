@@ -55,16 +55,13 @@ public enum LeaveByPlanner: Sendable {
         weather: WeatherSnapshot,
         now: Date
     ) -> PlanningFinding? {
-        guard weather.precipitationChance >= 0.5
+        let wet = weather.precipitationChance >= 0.5
             || weather.condition == .rain
             || weather.condition == .storm
             || weather.condition == .snow
-        else {
-            return nil
-        }
-        guard event.startDate > now, event.startDate < now.addingTimeInterval(8 * 3600) else {
-            return nil
-        }
+        guard wet else { return nil }
+        guard event.startDate > now else { return nil }
+        guard event.startDate < now.addingTimeInterval(8 * 3600) else { return nil }
         return PlanningFinding(
             kind: .weatherImpact,
             title: "Weather before \(event.title)",

@@ -2,6 +2,23 @@ import Foundation
 import LifePilotCore
 import LifePilotDesignSystem
 
+/// Optional system integrations for Home briefing enrichment.
+public struct HomeBriefingIntegrations: Sendable {
+    public var calendar: any CalendarIntegrating
+    public var weather: any WeatherIntegrating
+    public var travel: any TravelTimeIntegrating
+
+    public init(
+        calendar: any CalendarIntegrating = UnavailableCalendarIntegration(),
+        weather: any WeatherIntegrating = UnavailableWeatherIntegration(),
+        travel: any TravelTimeIntegrating = UnavailableTravelTimeIntegration()
+    ) {
+        self.calendar = calendar
+        self.weather = weather
+        self.travel = travel
+    }
+}
+
 /// Store- and planning-backed Home / Morning Briefing state.
 @Observable
 @MainActor
@@ -23,9 +40,7 @@ public final class HomeViewModel {
     private let eventStore: any EventStore
     private let preferenceStore: any PreferenceStore
     private let planningEngine: any PlanningEngine
-    private let calendarIntegration: any CalendarIntegrating
-    private let weatherIntegration: any WeatherIntegrating
-    private let travelIntegration: any TravelTimeIntegrating
+    private let integrations: HomeBriefingIntegrations
     private let clock: any ClockProviding
 
     public init(
@@ -33,18 +48,14 @@ public final class HomeViewModel {
         eventStore: any EventStore,
         preferenceStore: any PreferenceStore,
         planningEngine: any PlanningEngine = DeterministicPlanningEngine(),
-        calendarIntegration: any CalendarIntegrating = UnavailableCalendarIntegration(),
-        weatherIntegration: any WeatherIntegrating = UnavailableWeatherIntegration(),
-        travelIntegration: any TravelTimeIntegrating = UnavailableTravelTimeIntegration(),
+        integrations: HomeBriefingIntegrations = HomeBriefingIntegrations(),
         clock: any ClockProviding = SystemClock()
     ) {
         self.taskStore = taskStore
         self.eventStore = eventStore
         self.preferenceStore = preferenceStore
         self.planningEngine = planningEngine
-        self.calendarIntegration = calendarIntegration
-        self.weatherIntegration = weatherIntegration
-        self.travelIntegration = travelIntegration
+        self.integrations = integrations
         self.clock = clock
     }
 
@@ -57,7 +68,7 @@ public final class HomeViewModel {
         let preferences = await preferenceStore.loadPreferences()
         let tasks = await taskStore.allTasks()
         let hydrated = await hydrateEvents(now: now)
-        let weather = try? await weatherIntegration.currentWeather()
+        let weather = try? await integrations.weather.currentWeather()
         let leaveBy = await enrichLeaveBy(
             events: hydrated.events,
             weather: weather,
@@ -70,8 +81,7 @@ public final class HomeViewModel {
             preferences: preferences,
             tasks: tasks,
             events: hydrated.events,
-            extraFindings: leaveBy.findings,
-            weather: weather
+            extraFindings: leaveBy.findings
         )
         leaveBySummary = leaveBy.summary
         weatherSummary = weather.map {
@@ -99,11 +109,11 @@ public final class HomeViewModel {
     private func hydrateEvents(now: Date) async -> (events: [CalendarEvent], notes: [String]) {
         var events = await eventStore.allEvents()
         var notes = ["Local data"]
-        let calendarState = await calendarIntegration.authorizationState()
+        let calendarState = await integrations.calendar.authorizationState()
         if calendarState == .authorized || calendarState == .limited {
             let dayStart = Calendar.current.startOfDay(for: now)
             let dayEnd = Calendar.current.date(byAdding: .day, value: 2, to: dayStart) ?? now
-            if let remote = try? await calendarIntegration.fetchEvents(from: dayStart, to: dayEnd) {
+            if let remote = try? await integrations.calendar.fetchEvents(from: dayStart, to: dayEnd) {
                 events = mergeEvents(local: events, remote: remote)
                 notes.append("Calendar connected")
             } else {
@@ -133,7 +143,7 @@ public final class HomeViewModel {
 
         if let location = next.location, !location.isEmpty {
             let origin = "Current Location"
-            if let minutes = try? await travelIntegration.travelTimeMinutes(
+            if let minutes = try? await integrations.travel.travelTimeMinutes(
                 from: origin,
                 to: location,
                 departingAt: now
@@ -178,8 +188,7 @@ public final class HomeViewModel {
         preferences: UserPreferences,
         tasks: [TaskItem],
         events: [CalendarEvent],
-        extraFindings: [PlanningFinding],
-        weather _: WeatherSnapshot?
+        extraFindings: [PlanningFinding]
     ) {
         topTasks = tasks.filter { !$0.isCompleted }
             .sorted { lhs, rhs in

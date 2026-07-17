@@ -63,13 +63,17 @@ public struct RootTabView: View {
         switch tab {
         case .home:
             HomeView(
-                taskStore: dependencies.taskStore,
-                eventStore: dependencies.eventStore,
-                preferenceStore: dependencies.preferenceStore,
-                planningEngine: dependencies.planningEngine,
-                calendarIntegration: dependencies.calendarIntegration,
-                weatherIntegration: dependencies.weatherIntegration,
-                travelIntegration: dependencies.travelIntegration
+                viewModel: HomeViewModel(
+                    taskStore: dependencies.taskStore,
+                    eventStore: dependencies.eventStore,
+                    preferenceStore: dependencies.preferenceStore,
+                    planningEngine: dependencies.planningEngine,
+                    integrations: HomeBriefingIntegrations(
+                        calendar: dependencies.calendarIntegration,
+                        weather: dependencies.weatherIntegration,
+                        travel: dependencies.travelIntegration
+                    )
+                )
             )
             .navigationTitle("")
             #if os(iOS)

@@ -94,13 +94,17 @@ final class IntegrationProtocolTests: XCTestCase {
     }
 
     func testOptionalCloudKitToggleRoundTrip() async throws {
-        let defaults = UserDefaults(suiteName: "lifepilot.tests.cloudkit")!
-        defaults.removePersistentDomain(forName: "lifepilot.tests.cloudkit")
+        let suiteName = "lifepilot.tests.cloudkit.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
         let sync = OptionalCloudKitSyncIntegration(defaults: defaults)
-        XCTAssertFalse(await sync.isSyncEnabled())
+        let initiallyEnabled = await sync.isSyncEnabled()
+        XCTAssertFalse(initiallyEnabled)
         try await sync.setSyncEnabled(true)
-        XCTAssertTrue(await sync.isSyncEnabled())
+        let enabled = await sync.isSyncEnabled()
+        XCTAssertTrue(enabled)
         try await sync.setSyncEnabled(false)
-        XCTAssertFalse(await sync.isSyncEnabled())
+        let disabled = await sync.isSyncEnabled()
+        XCTAssertFalse(disabled)
     }
 }

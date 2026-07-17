@@ -48,7 +48,9 @@ final class HomeViewModelTests: XCTestCase {
             taskStore: InMemoryTaskStore(),
             eventStore: InMemoryEventStore(),
             preferenceStore: InMemoryPreferenceStore(),
-            calendarIntegration: UnavailableCalendarIntegration()
+            integrations: HomeBriefingIntegrations(
+                calendar: UnavailableCalendarIntegration()
+            )
         )
 
         await viewModel.load()
@@ -62,9 +64,9 @@ final class HomeViewModelTests: XCTestCase {
         let eventStore = InMemoryEventStore(seed: [
             CalendarEvent(
                 title: "Office",
+                location: "Downtown",
                 startDate: now.addingTimeInterval(7200),
                 endDate: now.addingTimeInterval(9000),
-                location: "Downtown",
                 travelBufferMinutes: 25
             ),
         ])
@@ -80,8 +82,10 @@ final class HomeViewModelTests: XCTestCase {
             taskStore: InMemoryTaskStore(),
             eventStore: eventStore,
             preferenceStore: InMemoryPreferenceStore(),
-            weatherIntegration: StaticWeatherIntegration(snapshot: weather),
-            travelIntegration: StaticTravelTimeIntegration(minutes: 22),
+            integrations: HomeBriefingIntegrations(
+                weather: StaticWeatherIntegration(snapshot: weather),
+                travel: StaticTravelTimeIntegration(minutes: 22)
+            ),
             clock: FixedClock(now)
         )
 
