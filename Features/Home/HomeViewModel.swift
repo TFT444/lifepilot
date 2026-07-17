@@ -139,46 +139,15 @@ public final class HomeViewModel {
         }
 
         var findings: [PlanningFinding] = []
-        var summary: String?
-
-        if let location = next.location, !location.isEmpty {
-            let origin = "Current Location"
-            if let minutes = try? await integrations.travel.travelTimeMinutes(
-                from: origin,
-                to: location,
-                departingAt: now
-            ) {
-                if let finding = LeaveByPlanner.finding(
-                    for: next,
-                    travelMinutes: minutes,
-                    weather: weather,
-                    now: now,
-                    extraBufferMinutes: max(0, preferences.defaultTravelBufferMinutes / 3)
-                ) {
-                    findings.append(finding)
-                    summary = finding.suggestedActionSummary
-                }
-            } else {
-                let hasBuffer = next.travelBufferMinutes > 0
-                    || preferences.defaultTravelBufferMinutes > 0
-                if hasBuffer {
-                    let minutes = max(
-                        next.travelBufferMinutes,
-                        preferences.defaultTravelBufferMinutes
-                    )
-                    if let finding = LeaveByPlanner.finding(
-                        for: next,
-                        travelMinutes: minutes,
-                        weather: weather,
-                        now: now
-                    ) {
-                        findings.append(finding)
-                        summary = finding.suggestedActionSummary
-                    }
-                }
-            }
+        let travel = await travelFinding(
+            for: next,
+            weather: weather,
+            preferences: preferences,
+            now: now
+        )
+        if let travel {
+            findings.append(travel)
         }
-
         if let weather {
             if let weatherFinding = LeaveByPlanner.weatherFinding(
                 for: next,
@@ -188,8 +157,39 @@ public final class HomeViewModel {
                 findings.append(weatherFinding)
             }
         }
+        return (findings, travel?.suggestedActionSummary)
+    }
 
-        return (findings, summary)
+    private func travelFinding(
+        for event: CalendarEvent,
+        weather: WeatherSnapshot?,
+        preferences: UserPreferences,
+        now: Date
+    ) async -> PlanningFinding? {
+        guard let location = event.location, !location.isEmpty else { return nil }
+        if let minutes = try? await integrations.travel.travelTimeMinutes(
+            from: "Current Location",
+            to: location,
+            departingAt: now
+        ) {
+            return LeaveByPlanner.finding(
+                for: event,
+                travelMinutes: minutes,
+                weather: weather,
+                now: now,
+                extraBufferMinutes: max(0, preferences.defaultTravelBufferMinutes / 3)
+            )
+        }
+        let hasBuffer = event.travelBufferMinutes > 0
+            || preferences.defaultTravelBufferMinutes > 0
+        guard hasBuffer else { return nil }
+        let minutes = max(event.travelBufferMinutes, preferences.defaultTravelBufferMinutes)
+        return LeaveByPlanner.finding(
+            for: event,
+            travelMinutes: minutes,
+            weather: weather,
+            now: now
+        )
     }
 
     private func applyBriefing(
