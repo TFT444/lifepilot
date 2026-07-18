@@ -37,19 +37,19 @@ public struct HomeStatusBanner: Equatable, Sendable {
 @Observable
 @MainActor
 public final class HomeViewModel {
-    public private(set) var greeting: String = ""
-    public private(set) var dateText: String = ""
-    public private(set) var recommendations: [BriefingCard.Content] = []
-    public private(set) var upcomingEvents: [CalendarEvent] = []
-    public private(set) var topTasks: [TaskItem] = []
-    public private(set) var findings: [PlanningFinding] = []
-    public private(set) var weatherSummary: String?
-    public private(set) var leaveBySummary: String?
-    public private(set) var freshnessSummary: String = "Local"
-    public private(set) var lastUpdated: Date?
-    public private(set) var statusBanner: HomeStatusBanner?
-    public private(set) var loadState: LoadableState<Bool> = .idle
-    public private(set) var isLoading = false
+    public internal(set) var greeting: String = ""
+    public internal(set) var dateText: String = ""
+    public internal(set) var recommendations: [BriefingCard.Content] = []
+    public internal(set) var upcomingEvents: [CalendarEvent] = []
+    public internal(set) var topTasks: [TaskItem] = []
+    public internal(set) var findings: [PlanningFinding] = []
+    public internal(set) var weatherSummary: String?
+    public internal(set) var leaveBySummary: String?
+    public internal(set) var freshnessSummary: String = "Local"
+    public internal(set) var lastUpdated: Date?
+    public internal(set) var statusBanner: HomeStatusBanner?
+    public internal(set) var loadState: LoadableState<Bool> = .idle
+    public internal(set) var isLoading = false
 
     let taskStore: any TaskStore
     let eventStore: any EventStore

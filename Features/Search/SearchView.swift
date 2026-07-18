@@ -84,10 +84,11 @@ public final class SearchViewModel {
         let tasks = await taskStore.allTasks()
         let events = await eventStore.allEvents()
         var matched: [Result] = []
-        for task in tasks where task.title.lowercased().contains(needle)
-            || (task.notes?.lowercased().contains(needle) ?? false)
-            || task.tags.contains(where: { $0.lowercased().contains(needle) })
-        {
+        for task in tasks {
+            let hit = task.title.lowercased().contains(needle)
+                || (task.notes?.lowercased().contains(needle) ?? false)
+                || task.tags.contains { $0.lowercased().contains(needle) }
+            guard hit else { continue }
             matched.append(
                 Result(
                     id: task.id,
@@ -98,10 +99,11 @@ public final class SearchViewModel {
                 )
             )
         }
-        for event in events where event.title.lowercased().contains(needle)
-            || (event.location?.lowercased().contains(needle) ?? false)
-            || (event.notes?.lowercased().contains(needle) ?? false)
-        {
+        for event in events {
+            let hit = event.title.lowercased().contains(needle)
+                || (event.location?.lowercased().contains(needle) ?? false)
+                || (event.notes?.lowercased().contains(needle) ?? false)
+            guard hit else { continue }
             matched.append(
                 Result(
                     id: event.id,
