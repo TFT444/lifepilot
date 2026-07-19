@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>LifePilot — Demo</title>
-<meta name="description" content="LifePilot — the AI operating system that prepares your day before you ask. Interactive hackathon demo.">
+<meta name="description" content="LifePilot — the AI operating system that prepares your day before you ask. Interactive product demo.">
+<meta name="theme-color" content="#05050f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2305050f'/%3E%3Cpath d='M50 22L57 43L78 50L57 57L50 78L43 57L22 50L43 43Z' fill='%23a855f7'/%3E%3C/svg%3E">
+<meta property="og:title" content="LifePilot — AI that prepares your day">
+<meta property="og:description" content="Your calendar, inbox, weather, travel and priorities — understood, predicted and prepared by one intelligence layer.">
+<meta property="og:type" content="website">
 <style>
   :root {
     --void: #05050f;
@@ -1082,7 +1087,7 @@
         </div>
       </div>
 
-      <div class="card fade-item in" style="text-align:center; color:var(--ink-faint); font-size:0.78rem; font-weight:600;">LifePilot v0.1.0 · Demo Build</div>
+      <div class="card fade-item in" style="text-align:center; color:var(--ink-faint); font-size:0.78rem; font-weight:600;">LifePilot v0.1.0 · Demo Build<br><span style="font-size:0.7rem;font-weight:500;">Live transit powered by TfL Open Data</span></div>
     `;
   }
   function toggleSetting(key, el) {
@@ -1096,7 +1101,12 @@
      or API is unavailable, so the demo never breaks. */
   const TFL = {
     base: 'https://api.tfl.gov.uk',
-    appKey: '', // optional: paste a TfL app key here for higher rate limits
+    // Anonymous access works out of the box (50 req/min). For production, register a
+    // free key at api-portal.tfl.gov.uk (500 req/min) and provide it one of three ways:
+    //   1) ?tflKey=YOUR_KEY in the URL (persisted to localStorage), or
+    //   2) localStorage.setItem('tflAppKey','YOUR_KEY'), or
+    //   3) hard-code it below.
+    appKey: '',
     stations: [
       { id: '940GZZLUOXC', name: 'Oxford Circus', short: 'Oxford Circus' },
       { id: '940GZZLUKSX', name: "King's Cross St. Pancras", short: "King's Cross" },
@@ -1137,16 +1147,39 @@
   state.tfl = { stationIdx: 0, arrivals: [], status: [], live: false, loading: true, fetchedAt: 0 };
   let _tflBusy = false, _tflAutoStarted = false;
 
+  // Resolve an API key from URL (?tflKey=), localStorage, or the hard-coded value.
+  function getTflKey() {
+    try {
+      const fromUrl = new URLSearchParams(location.search).get('tflKey');
+      if (fromUrl) { localStorage.setItem('tflAppKey', fromUrl); return fromUrl; }
+      const fromLS = localStorage.getItem('tflAppKey');
+      if (fromLS) return fromLS;
+    } catch (e) { /* storage blocked — fall through to anonymous */ }
+    return TFL.appKey || '';
+  }
+
+  // Tiny in-memory cache so quickly re-opening/switching stays well under rate limits.
+  const _tflCache = {};
+  function cacheGet(k, ttlMs) { const e = _tflCache[k]; return (e && Date.now() - e.t < ttlMs) ? e.v : null; }
+  function cacheSet(k, v) { _tflCache[k] = { t: Date.now(), v }; return v; }
+
   async function fetchJSON(url) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 8000);
     try {
+      const key = getTflKey();
       const sep = url.includes('?') ? '&' : '?';
-      const keyed = TFL.appKey ? url + sep + 'app_key=' + TFL.appKey : url;
+      const keyed = key ? url + sep + 'app_key=' + encodeURIComponent(key) : url;
       const res = await fetch(keyed, { signal: ctrl.signal });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return await res.json();
     } finally { clearTimeout(timer); }
+  }
+
+  function fetchCached(url, cacheKey, ttlMs) {
+    const hit = cacheGet(cacheKey, ttlMs);
+    if (hit) return Promise.resolve(hit);
+    return fetchJSON(url).then(v => cacheSet(cacheKey, v));
   }
 
   const cleanDest = (s) => (s || 'Check front of train')
@@ -1173,8 +1206,8 @@
     const station = TFL.stations[st.stationIdx];
     try {
       const [arr, status] = await Promise.all([
-        fetchJSON(`${TFL.base}/StopPoint/${station.id}/Arrivals`),
-        fetchJSON(`${TFL.base}/Line/Mode/tube/Status`),
+        fetchCached(`${TFL.base}/StopPoint/${station.id}/Arrivals`, 'arr:' + station.id, 10000),
+        fetchCached(`${TFL.base}/Line/Mode/tube/Status`, 'status:tube', 20000),
       ]);
       st.arrivals = normalizeArrivals(arr);
       st.status = normalizeStatus(status);
@@ -1268,6 +1301,7 @@
       </div>
       <div class="sheet-section-title">Line status</div>
       <div class="tfl-status-list">${statusList || '<div class="tfl-skeleton"></div>'}</div>
+      <div style="text-align:center;font-size:0.66rem;color:var(--ink-faint);font-weight:600;margin-top:0.9rem;">Powered by TfL Open Data</div>
       <div class="sheet-buttons"><button class="btn-notnow" onclick="closeSheet()" style="flex:1 1 100%">Close</button></div>`;
   }
 
