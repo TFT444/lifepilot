@@ -1,4 +1,5 @@
 import Foundation
+import LifePilotCore
 
 /// Owns onboarding progression and contextual permission requests. A request
 /// can only be triggered while its education step is visible.

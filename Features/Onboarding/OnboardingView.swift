@@ -105,7 +105,8 @@ public struct OnboardingView: View {
     @ViewBuilder
     private var actionButtons: some View {
         if let permission = viewModel.currentStep.permission,
-           !viewModel.permissionHandled {
+           !viewModel.permissionHandled
+        {
             VStack(spacing: Spacing.sm) {
                 Button(
                     viewModel.isRequestingPermission

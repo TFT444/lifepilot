@@ -30,7 +30,7 @@ final class CoreLocationProvider: NSObject, LocationProviding, CLLocationManager
         case .authorizedAlways, .authorizedWhenInUse:
             return .authorized
         #else
-        case .authorized:
+        case .authorized, .authorizedAlways:
             return .authorized
         #endif
         @unknown default:

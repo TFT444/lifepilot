@@ -115,61 +115,44 @@ public struct UserPreferences: Hashable, Sendable, Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let defaults = UserPreferences()
-        self.init(
-            onboardingCompleted: try container.decodeIfPresent(
-                Bool.self,
-                forKey: .onboardingCompleted
-            ) ?? defaults.onboardingCompleted,
-            briefingHour: try container.decodeIfPresent(
-                Int.self,
-                forKey: .briefingHour
-            ) ?? defaults.briefingHour,
-            briefingMinute: try container.decodeIfPresent(
-                Int.self,
-                forKey: .briefingMinute
-            ) ?? defaults.briefingMinute,
-            quietHoursStart: try Self.decodeOptionalHour(
+        try self.init(
+            onboardingCompleted: Self.decode(
+                .onboardingCompleted,
+                from: container,
+                defaultValue: defaults.onboardingCompleted
+            ),
+            briefingHour: Self.decode(.briefingHour, from: container, defaultValue: defaults.briefingHour),
+            briefingMinute: Self.decode(.briefingMinute, from: container, defaultValue: defaults.briefingMinute),
+            quietHoursStart: Self.decodeOptionalHour(
                 .quietHoursStart,
                 from: container,
                 defaultValue: defaults.quietHoursStart
             ),
-            quietHoursEnd: try Self.decodeOptionalHour(
+            quietHoursEnd: Self.decodeOptionalHour(
                 .quietHoursEnd,
                 from: container,
                 defaultValue: defaults.quietHoursEnd
             ),
-            defaultTravelBufferMinutes: try container.decodeIfPresent(
-                Int.self,
-                forKey: .defaultTravelBufferMinutes
-            ) ?? defaults.defaultTravelBufferMinutes,
-            defaultPreparationMinutes: try container.decodeIfPresent(
-                Int.self,
-                forKey: .defaultPreparationMinutes
-            ) ?? defaults.defaultPreparationMinutes,
-            workDayStartHour: try container.decodeIfPresent(
-                Int.self,
-                forKey: .workDayStartHour
-            ) ?? defaults.workDayStartHour,
-            workDayEndHour: try container.decodeIfPresent(
-                Int.self,
-                forKey: .workDayEndHour
-            ) ?? defaults.workDayEndHour,
-            workDays: try container.decodeIfPresent(
-                [Int].self,
-                forKey: .workDays
-            ) ?? defaults.workDays,
-            sensitiveNotificationPreviews: try container.decodeIfPresent(
-                Bool.self,
-                forKey: .sensitiveNotificationPreviews
-            ) ?? defaults.sensitiveNotificationPreviews,
-            appearance: try container.decodeIfPresent(
-                AppearancePreference.self,
-                forKey: .appearance
-            ) ?? defaults.appearance,
-            skippedPermissionIDs: try container.decodeIfPresent(
-                Set<String>.self,
-                forKey: .skippedPermissionIDs
-            ) ?? []
+            defaultTravelBufferMinutes: Self.decode(
+                .defaultTravelBufferMinutes,
+                from: container,
+                defaultValue: defaults.defaultTravelBufferMinutes
+            ),
+            defaultPreparationMinutes: Self.decode(
+                .defaultPreparationMinutes,
+                from: container,
+                defaultValue: defaults.defaultPreparationMinutes
+            ),
+            workDayStartHour: Self.decode(.workDayStartHour, from: container, defaultValue: defaults.workDayStartHour),
+            workDayEndHour: Self.decode(.workDayEndHour, from: container, defaultValue: defaults.workDayEndHour),
+            workDays: Self.decode(.workDays, from: container, defaultValue: defaults.workDays),
+            sensitiveNotificationPreviews: Self.decode(
+                .sensitiveNotificationPreviews,
+                from: container,
+                defaultValue: defaults.sensitiveNotificationPreviews
+            ),
+            appearance: Self.decode(.appearance, from: container, defaultValue: defaults.appearance),
+            skippedPermissionIDs: Self.decode(.skippedPermissionIDs, from: container, defaultValue: Set<String>())
         )
     }
 
@@ -200,6 +183,14 @@ public struct UserPreferences: Hashable, Sendable, Codable {
     ) throws -> Int? {
         guard container.contains(key) else { return defaultValue }
         return try container.decodeIfPresent(Int.self, forKey: key)
+    }
+
+    private static func decode<Value: Decodable>(
+        _ key: CodingKeys,
+        from container: KeyedDecodingContainer<CodingKeys>,
+        defaultValue: Value
+    ) throws -> Value {
+        try container.decodeIfPresent(Value.self, forKey: key) ?? defaultValue
     }
 
     public enum AppearancePreference: String, CaseIterable, Sendable, Codable {

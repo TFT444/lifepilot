@@ -1,6 +1,7 @@
 import LifePilotCore
 import LifePilotDesignSystem
 import SwiftUI
+
 /// Wiring bag so SettingsView stays under SwiftLint parameter limits.
 public struct SettingsConnections: Sendable {
     public var cloudSync: any CloudSyncIntegrating

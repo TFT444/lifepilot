@@ -211,10 +211,8 @@ final class PermissionFlowTests: XCTestCase {
         }
         """
 
-        let decoded = try JSONDecoder().decode(
-            UserPreferences.self,
-            from: try XCTUnwrap(legacy.data(using: .utf8))
-        )
+        let data = try XCTUnwrap(legacy.data(using: .utf8))
+        let decoded = try JSONDecoder().decode(UserPreferences.self, from: data)
 
         XCTAssertEqual(decoded.briefingHour, 8)
         XCTAssertTrue(decoded.skippedPermissionIDs.isEmpty)
