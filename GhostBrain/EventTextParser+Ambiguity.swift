@@ -69,7 +69,10 @@ extension EventTextParser {
     }
 
     private static func hasDateToken(in text: String) -> Bool {
-        let named = #"\b(?:\d{1,2}\s+[A-Za-z]{3,9}|[A-Za-z]{3,9}\s+\d{1,2})\b"#
+        let month = "(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|"
+            + "Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|"
+            + "Nov(?:ember)?|Dec(?:ember)?)"
+        let named = "\\b(?:\\d{1,2}\\s+\(month)|\(month)\\s+\\d{1,2})\\b"
         let numeric = #"\b\d{1,4}[/-]\d{1,2}(?:[/-]\d{4})?\b"#
         return firstMatch(named, in: text, caseInsensitive: true) != nil
             || firstMatch(numeric, in: text, caseInsensitive: false) != nil
