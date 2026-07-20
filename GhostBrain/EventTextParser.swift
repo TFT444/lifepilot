@@ -109,18 +109,51 @@ private extension EventTextParser {
 
     func findExplicitDate(in text: String, now: Date) -> (date: Date, matched: String)? {
         // "14 July" / "14 Jul"
-        if let match = Self.firstMatch(#"\b(\d{1,2})\s+([A-Za-z]{3,9})\b"#, in: text, caseInsensitive: true),
-           let month = Self.monthNumber(match.group(2)),
-           let date = makeDate(day: Int(match.group(1) ?? "") ?? 0, month: month, now: now) {
-            return (date, match.matched)
+        let dayMonth = explicitDateMatch(
+            #"\b(\d{1,2})\s+([A-Za-z]{3,9})\b"#,
+            dayGroup: 1,
+            monthGroup: 2,
+            in: text,
+            now: now
+        )
+        if let dayMonth {
+            return dayMonth
         }
+
         // "July 14" / "Jul 14"
-        if let match = Self.firstMatch(#"\b([A-Za-z]{3,9})\s+(\d{1,2})\b"#, in: text, caseInsensitive: true),
-           let month = Self.monthNumber(match.group(1)),
-           let date = makeDate(day: Int(match.group(2) ?? "") ?? 0, month: month, now: now) {
-            return (date, match.matched)
+        let monthDay = explicitDateMatch(
+            #"\b([A-Za-z]{3,9})\s+(\d{1,2})\b"#,
+            dayGroup: 2,
+            monthGroup: 1,
+            in: text,
+            now: now
+        )
+        if let monthDay {
+            return monthDay
         }
         return nil
+    }
+
+    func explicitDateMatch(
+        _ pattern: String,
+        dayGroup: Int,
+        monthGroup: Int,
+        in text: String,
+        now: Date
+    ) -> (date: Date, matched: String)? {
+        guard let match = Self.firstMatch(pattern, in: text, caseInsensitive: true) else {
+            return nil
+        }
+        guard let month = Self.monthNumber(match.group(monthGroup)) else {
+            return nil
+        }
+        guard let rawDay = match.group(dayGroup), let day = Int(rawDay) else {
+            return nil
+        }
+        guard let date = makeDate(day: day, month: month, now: now) else {
+            return nil
+        }
+        return (date, match.matched)
     }
 
     func startOfDay(_ now: Date, offsetDays: Int) -> Date {
