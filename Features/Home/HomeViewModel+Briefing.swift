@@ -64,53 +64,68 @@ extension HomeViewModel {
 
     func hydrateTasks(local: [TaskItem]) async -> (tasks: [TaskItem], notes: [String]) {
         let remindersState = await integrations.reminders.authorizationState()
-        if remindersState == .authorized || remindersState == .limited {
-            if let reminders = try? await integrations.reminders.fetchOpenReminders() {
-                var existingByExternal: [String: TaskItem] = [:]
-                for task in local {
-                    if let identifier = task.externalIdentifier {
-                        existingByExternal[identifier] = task
-                    }
-                }
-                let remoteIdentifiers = Set(reminders.compactMap(\.externalIdentifier))
-                for task in local where task.source == .eventKitReminders {
-                    guard let identifier = task.externalIdentifier,
-                          !remoteIdentifiers.contains(identifier)
-                    else { continue }
-                    try? await taskStore.delete(id: task.id)
-                    existingByExternal.removeValue(forKey: identifier)
-                }
-                for var reminder in reminders {
-                    if let identifier = reminder.externalIdentifier {
-                        if let existing = existingByExternal[identifier] {
-                            reminder = TaskItem(
-                                id: existing.id,
-                                title: reminder.title,
-                                notes: reminder.notes,
-                                dueDate: reminder.dueDate,
-                                isCompleted: reminder.isCompleted,
-                                completedAt: reminder.completedAt,
-                                source: .eventKitReminders,
-                                externalIdentifier: identifier,
-                                syncState: .synced,
-                                createdAt: existing.createdAt,
-                                updatedAt: Date()
-                            )
-                        }
-                    }
-                    try? await taskStore.save(reminder)
-                    if let identifier = reminder.externalIdentifier {
-                        existingByExternal[identifier] = reminder
-                    }
-                }
-                return (await taskStore.allTasks(), ["Reminders connected"])
+        switch remindersState {
+        case .authorized, .limited:
+            do {
+                let reminders = try await integrations.reminders.fetchOpenReminders()
+                let reconciled = await reconcileReminders(local: local, remote: reminders)
+                return (reconciled, ["Reminders connected"])
+            } catch {
+                return (local, ["Reminders unavailable - showing local tasks"])
             }
+        case .denied, .restricted:
             return (local, ["Reminders unavailable - showing local tasks"])
+        case .unavailable, .notDetermined:
+            return (local, [])
         }
-        if remindersState == .denied || remindersState == .restricted {
-            return (local, ["Reminders unavailable - showing local tasks"])
+    }
+
+    private func reconcileReminders(local: [TaskItem], remote: [TaskItem]) async -> [TaskItem] {
+        var existingByExternal: [String: TaskItem] = [:]
+        for task in local {
+            if let identifier = task.externalIdentifier {
+                existingByExternal[identifier] = task
+            }
         }
-        return (local, [])
+        let remoteIdentifiers = Set(remote.compactMap(\.externalIdentifier))
+        for task in local where task.source == .eventKitReminders {
+            guard let identifier = task.externalIdentifier,
+                  !remoteIdentifiers.contains(identifier)
+            else { continue }
+            try? await taskStore.delete(id: task.id)
+            existingByExternal.removeValue(forKey: identifier)
+        }
+        for reminder in remote {
+            let reconciled = reconciledReminder(reminder, existingByExternal: existingByExternal)
+            try? await taskStore.save(reconciled)
+            if let identifier = reconciled.externalIdentifier {
+                existingByExternal[identifier] = reconciled
+            }
+        }
+        return await taskStore.allTasks()
+    }
+
+    private func reconciledReminder(
+        _ reminder: TaskItem,
+        existingByExternal: [String: TaskItem]
+    ) -> TaskItem {
+        guard let identifier = reminder.externalIdentifier,
+              let existing = existingByExternal[identifier]
+        else { return reminder }
+        return TaskItem(
+            id: existing.id,
+            title: reminder.title,
+            notes: reminder.notes,
+            dueDate: reminder.dueDate,
+            isCompleted: reminder.isCompleted,
+            completedAt: reminder.completedAt,
+            recurrence: reminder.recurrence,
+            source: .eventKitReminders,
+            externalIdentifier: identifier,
+            syncState: .synced,
+            createdAt: existing.createdAt,
+            updatedAt: Date()
+        )
     }
 
     func enrichLeaveBy(
