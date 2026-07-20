@@ -211,18 +211,15 @@ private actor NotificationPreferenceStore: PreferenceStore {
         []
     }
 
-    func saveMemory(_: MemoryItem) async throws {
-    }
+    func saveMemory(_: MemoryItem) async throws {}
 
-    func deleteMemory(id _: UUID) async throws {
-    }
+    func deleteMemory(id _: UUID) async throws {}
 
     func exportAll() async throws -> Data {
         Data()
     }
 
-    func deleteAllLifePilotData() async throws {
-    }
+    func deleteAllLifePilotData() async throws {}
 }
 
 private struct FixedNotificationClock: ClockProviding {

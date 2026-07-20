@@ -81,21 +81,22 @@ extension HomeViewModel {
                     existingByExternal.removeValue(forKey: identifier)
                 }
                 for var reminder in reminders {
-                    if let identifier = reminder.externalIdentifier,
-                       let existing = existingByExternal[identifier] {
-                        reminder = TaskItem(
-                            id: existing.id,
-                            title: reminder.title,
-                            notes: reminder.notes,
-                            dueDate: reminder.dueDate,
-                            isCompleted: reminder.isCompleted,
-                            completedAt: reminder.completedAt,
-                            source: .eventKitReminders,
-                            externalIdentifier: identifier,
-                            syncState: .synced,
-                            createdAt: existing.createdAt,
-                            updatedAt: Date()
-                        )
+                    if let identifier = reminder.externalIdentifier {
+                        if let existing = existingByExternal[identifier] {
+                            reminder = TaskItem(
+                                id: existing.id,
+                                title: reminder.title,
+                                notes: reminder.notes,
+                                dueDate: reminder.dueDate,
+                                isCompleted: reminder.isCompleted,
+                                completedAt: reminder.completedAt,
+                                source: .eventKitReminders,
+                                externalIdentifier: identifier,
+                                syncState: .synced,
+                                createdAt: existing.createdAt,
+                                updatedAt: Date()
+                            )
+                        }
                     }
                     try? await taskStore.save(reminder)
                     if let identifier = reminder.externalIdentifier {
