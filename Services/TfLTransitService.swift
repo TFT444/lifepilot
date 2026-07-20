@@ -128,9 +128,9 @@ public struct TfLTransitService: TransitProviding {
     struct LineDTO: Decodable {
         let name: String?
         let lineStatuses: [LineStatusDTO]?
+    }
 
-        struct LineStatusDTO: Decodable {
-            let statusSeverityDescription: String?
-        }
+    struct LineStatusDTO: Decodable {
+        let statusSeverityDescription: String?
     }
 }

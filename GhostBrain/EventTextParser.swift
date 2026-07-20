@@ -24,7 +24,7 @@ public struct EventTextParser: Sendable {
             return CapturedEvent(title: "New reminder", confidence: 0)
         }
 
-        let time: ParsedTime? = Self.findTime(in: text)
+        let time = Self.findTime(in: text)
         let day = findDay(in: text, now: now)
         let location = Self.findLocation(in: text)
 
@@ -52,8 +52,6 @@ public struct EventTextParser: Sendable {
         )
     }
 
-    // MARK: - Date resolution
-
     /// A time-of-day parsed out of free text, plus the exact substring matched.
     struct ParsedTime {
         let hour: Int
@@ -61,11 +59,7 @@ public struct EventTextParser: Sendable {
         let matched: String
     }
 
-    private func resolveDate(
-        day: Date?,
-        time: ParsedTime?,
-        now: Date
-    ) -> Date? {
+    private func resolveDate(day: Date?, time: ParsedTime?, now: Date) -> Date? {
         // Need at least a time or a day to produce a concrete date.
         guard day != nil || time != nil else { return nil }
         let base = day ?? now
@@ -75,9 +69,83 @@ public struct EventTextParser: Sendable {
         comps.second = 0
         return calendar.date(from: comps)
     }
+}
 
-    // MARK: - Time
+// MARK: - Day parsing
 
+private extension EventTextParser {
+    func findDay(in text: String, now: Date) -> (date: Date, matched: String)? {
+        let lower = text.lowercased()
+        if lower.contains("tomorrow") {
+            return (startOfDay(now, offsetDays: 1), matchedSlice("tomorrow", in: text))
+        }
+        if lower.contains("today") || lower.contains("tonight") {
+            let token = lower.contains("today") ? "today" : "tonight"
+            return (startOfDay(now, offsetDays: 0), matchedSlice(token, in: text))
+        }
+        if let weekday = findWeekday(in: text, lower: lower, now: now) {
+            return weekday
+        }
+        return findExplicitDate(in: text, now: now)
+    }
+
+    func findWeekday(in text: String, lower: String, now: Date) -> (date: Date, matched: String)? {
+        let weekdays: [(name: String, weekday: Int)] = [
+            ("sunday", 1), ("monday", 2), ("tuesday", 3), ("wednesday", 4),
+            ("thursday", 5), ("friday", 6), ("saturday", 7),
+            ("sun", 1), ("mon", 2), ("tue", 3), ("wed", 4), ("thu", 5), ("fri", 6), ("sat", 7),
+        ]
+        for entry in weekdays where rangeOfWord(entry.name, in: lower) != nil {
+            return (nextDate(weekday: entry.weekday, from: now), matchedSlice(entry.name, in: text))
+        }
+        return nil
+    }
+
+    func findExplicitDate(in text: String, now: Date) -> (date: Date, matched: String)? {
+        // "14 July" / "14 Jul"
+        if let match = Self.firstMatch(#"\b(\d{1,2})\s+([A-Za-z]{3,9})\b"#, in: text, caseInsensitive: true),
+           let month = Self.monthNumber(match.group(2)),
+           let date = makeDate(day: Int(match.group(1) ?? "") ?? 0, month: month, now: now)
+        {
+            return (date, match.matched)
+        }
+        // "July 14" / "Jul 14"
+        if let match = Self.firstMatch(#"\b([A-Za-z]{3,9})\s+(\d{1,2})\b"#, in: text, caseInsensitive: true),
+           let month = Self.monthNumber(match.group(1)),
+           let date = makeDate(day: Int(match.group(2) ?? "") ?? 0, month: month, now: now)
+        {
+            return (date, match.matched)
+        }
+        return nil
+    }
+
+    func startOfDay(_ now: Date, offsetDays: Int) -> Date {
+        let start = calendar.startOfDay(for: now)
+        return calendar.date(byAdding: .day, value: offsetDays, to: start) ?? start
+    }
+
+    func nextDate(weekday: Int, from now: Date) -> Date {
+        let today = calendar.startOfDay(for: now)
+        let current = calendar.component(.weekday, from: today)
+        var delta = weekday - current
+        if delta < 0 { delta += 7 }
+        return calendar.date(byAdding: .day, value: delta, to: today) ?? today
+    }
+
+    func makeDate(day: Int, month: Int, now: Date) -> Date? {
+        guard day >= 1, day <= 31 else { return nil }
+        let year = calendar.component(.year, from: now)
+        var comps = DateComponents()
+        comps.year = year
+        comps.month = month
+        comps.day = day
+        return calendar.date(from: comps)
+    }
+}
+
+// MARK: - Time parsing
+
+extension EventTextParser {
     static func findTime(in text: String) -> ParsedTime? {
         // 12-hour with am/pm, e.g. "2:30 PM", "6 am", "8p.m."
         if let match = firstMatch(#"\b(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?\b"#, in: text, caseInsensitive: true) {
@@ -96,71 +164,11 @@ public struct EventTextParser: Sendable {
         }
         return nil
     }
+}
 
-    // MARK: - Day
+// MARK: - Location & title
 
-    private func findDay(in text: String, now: Date) -> (date: Date, matched: String)? {
-        let lower = text.lowercased()
-
-        if lower.contains("tomorrow") {
-            return (startOfDay(now, offsetDays: 1), matchedSlice("tomorrow", in: text))
-        }
-        if lower.contains("today") || lower.contains("tonight") {
-            let token = lower.contains("today") ? "today" : "tonight"
-            return (startOfDay(now, offsetDays: 0), matchedSlice(token, in: text))
-        }
-
-        // Weekday names (full and 3-letter), resolved to the next occurrence.
-        let weekdays: [(name: String, weekday: Int)] = [
-            ("sunday", 1), ("monday", 2), ("tuesday", 3), ("wednesday", 4),
-            ("thursday", 5), ("friday", 6), ("saturday", 7),
-            ("sun", 1), ("mon", 2), ("tue", 3), ("wed", 4), ("thu", 5), ("fri", 6), ("sat", 7),
-        ]
-        for entry in weekdays where rangeOfWord(entry.name, in: lower) != nil {
-            return (nextDate(weekday: entry.weekday, from: now), matchedSlice(entry.name, in: text))
-        }
-
-        // "14 July" / "July 14" / "14 Jul"
-        if let match = Self.firstMatch(#"\b(\d{1,2})\s+([A-Za-z]{3,9})\b"#, in: text, caseInsensitive: true),
-           let month = Self.monthNumber(match.group(2)),
-           let date = makeDate(day: Int(match.group(1) ?? "") ?? 0, month: month, now: now)
-        {
-            return (date, match.matched)
-        }
-        if let match = Self.firstMatch(#"\b([A-Za-z]{3,9})\s+(\d{1,2})\b"#, in: text, caseInsensitive: true),
-           let month = Self.monthNumber(match.group(1)),
-           let date = makeDate(day: Int(match.group(2) ?? "") ?? 0, month: month, now: now)
-        {
-            return (date, match.matched)
-        }
-        return nil
-    }
-
-    private func startOfDay(_ now: Date, offsetDays: Int) -> Date {
-        let start = calendar.startOfDay(for: now)
-        return calendar.date(byAdding: .day, value: offsetDays, to: start) ?? start
-    }
-
-    private func nextDate(weekday: Int, from now: Date) -> Date {
-        let today = calendar.startOfDay(for: now)
-        let current = calendar.component(.weekday, from: today)
-        var delta = weekday - current
-        if delta < 0 { delta += 7 }
-        return calendar.date(byAdding: .day, value: delta, to: today) ?? today
-    }
-
-    private func makeDate(day: Int, month: Int, now: Date) -> Date? {
-        guard day >= 1, day <= 31 else { return nil }
-        let year = calendar.component(.year, from: now)
-        var comps = DateComponents()
-        comps.year = year
-        comps.month = month
-        comps.day = day
-        return calendar.date(from: comps)
-    }
-
-    // MARK: - Location
-
+extension EventTextParser {
     static func findLocation(in text: String) -> (value: String, matched: String)? {
         // "@ Somewhere" or "at Somewhere" where the following text is not a time.
         // We scan every " at " and take the first whose tail isn't a time value.
@@ -176,7 +184,6 @@ public struct EventTextParser: Sendable {
                 if let time = findTime(in: tail), time.matched.trimmingCharacters(in: .whitespaces) == tail {
                     continue
                 }
-                // Strip a leading time if the tail is "2:30 PM at Baker St".
                 let cleaned = stripLeadingTime(from: tail)
                 if cleaned.isEmpty { continue }
                 return (cleaned, nsText.substring(with: match.range(at: 0)))
@@ -197,8 +204,6 @@ public struct EventTextParser: Sendable {
         return result.trimmingCharacters(in: .whitespaces)
     }
 
-    // MARK: - Title
-
     static func cleanTitle(_ source: String, fallback: String) -> String {
         var title = source
         // Remove common leftover connective words and separators.
@@ -210,9 +215,11 @@ public struct EventTextParser: Sendable {
         title = title.trimmingCharacters(in: .whitespacesAndNewlines)
         return title.isEmpty ? fallback.trimmingCharacters(in: .whitespacesAndNewlines) : title
     }
+}
 
-    // MARK: - Month names
+// MARK: - Regex & string helpers
 
+extension EventTextParser {
     static func monthNumber(_ raw: String?) -> Int? {
         guard let raw = raw?.lowercased() else { return nil }
         let months = [
@@ -234,8 +241,6 @@ public struct EventTextParser: Sendable {
         }
         return nil
     }
-
-    // MARK: - Regex helper
 
     struct RegexMatch {
         let matched: String
@@ -263,16 +268,14 @@ public struct EventTextParser: Sendable {
         return RegexMatch(matched: nsText.substring(with: match.range(at: 0)), groups: groups)
     }
 
-    // MARK: - Small string helpers
-
-    private func rangeOfWord(_ word: String, in lower: String) -> Range<String.Index>? {
+    func rangeOfWord(_ word: String, in lower: String) -> Range<String.Index>? {
         guard let range = lower.range(of: word) else { return nil }
         let beforeOK = range.lowerBound == lower.startIndex || !lower[lower.index(before: range.lowerBound)].isLetter
         let afterOK = range.upperBound == lower.endIndex || !lower[range.upperBound].isLetter
         return (beforeOK && afterOK) ? range : nil
     }
 
-    private func matchedSlice(_ token: String, in text: String) -> String {
+    func matchedSlice(_ token: String, in text: String) -> String {
         if let range = text.range(of: token, options: [.caseInsensitive]) {
             return String(text[range])
         }
