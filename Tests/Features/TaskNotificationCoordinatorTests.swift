@@ -94,7 +94,7 @@ final class TaskNotificationCoordinatorTests: XCTestCase {
         XCTAssertEqual(calendar.component(.day, from: request.fireDate), 22)
     }
 
-    func testOverdueRecurringTaskSchedulesNextOccurrenceButOneOffDoesNot() async {
+    func testOverdueRecurringTaskSchedulesNextOccurrenceButOneOffDoesNot() async throws {
         let scheduler = RecordingNotificationScheduler(state: .authorized)
         let coordinator = TaskNotificationCoordinator(
             scheduler: scheduler,
